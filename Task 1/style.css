@@ -13,17 +13,23 @@
     border-bottom: 20px solid red;
     padding: 5px;
 }
-#green{
+h2{
     background: rgb(31, 173, 31);
     padding: 5px;
     color: white;
+    padding-left: 15px;
 }
 
 .lists{
     color: maroon;
+    font-style: italic;
 }
 
-#grey{
+.zlink{
+    text-decoration: none;
+}
+
+h3{
     color: rgb(170, 170, 170);
 }
 
@@ -32,7 +38,7 @@
     background: rgb(218, 217, 217);
 }
 
-#upper{
+b{
     text-transform: uppercase ;
     font-style: italic;
 }
