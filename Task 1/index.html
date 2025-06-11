@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task 1</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="body">
+    <div class="container">
+        <h1 class="header">My first web page</h1>
+
+        <h2 id="green">What this is</h2>
+        Welcome to <i>my first webpage</i>. I created this webpage without assistance of a webpage editor. Just my
+        little text editor and a keen <b id="upper">understanding of HTML</b>.
+        <h2 id="green">Why this is</h2>
+        <ul class="lists">
+            <li>To learn HTML</li>
+            <li>List element</li>
+            <ol>
+                <li>Home</li>
+                <li>FAQ</li>
+                <li>Contacts</li>
+                <li>About</li>
+            </ol>
+            <li>Here I have created ordered and unordered list</li>
+        </ul>
+        <h2 id="green">ZeusLearning.com</h2>
+        <a href="https://www.zeuslearning.com/" target="_blank">This link will open zeuslearning.com in new tab</a>
+        <h2 id="green">On click of following image navigate to Google.com</h1>
+            <a href="https://www.google.com/">
+                <img src="google.png" alt="Google" class="img1">
+            </a>
+            <h2 id="grey">Some random table</h2>
+            <table border="1" class="t1">
+                <tr>
+                    <td>Row 1,cell 1</td>
+                    <td>Row 1,cell 2</td>
+                    <td>Row 1,cell 3</td>
+                </tr>
+                <tr>
+                    <td>Row 2,cell 1</td>
+                    <td>Row 2,cell 2</td>
+                    <td>Row 2,cell 3</td>
+                </tr>
+                <tr>
+                    <td>Row 3,cell 1</td>
+                    <td>Row 3,cell 2</td>
+                    <td>Row 3,cell 3</td>
+                </tr>
+                <tr>
+                    <td>Row 4,cell 1</td>
+                    <td>Row 4,cell 2</td>
+                    <td>Row 4,cell 3</td>
+                </tr>
+            </table>
+            <h2 id="grey">Some random form</h2>
+            <b id="upper">Note:</b> It looks the part, but won't do a anything. <br><br>
+            <form id="myForm">
+                <label for="Name">Name:</label><br><br>
+                <input type="text" name="name" id="name" placeholder="Your Name"> <br>
+                <span id="nameError" class="error"></span><br><br>
+                <label for="Comments">Comments:</label><br><br>
+                <textarea name="textarea" id="comments" placeholder="Your Comments" rows="4"></textarea><br>
+                <span id="commentError" class="error"></span><br><br>
+                <label for="gender">Are you:</label><br><br>
+                <input type="radio" name="gender" id="male">Male <br><br>
+                <input type="radio" name="gender" id="female">Female <br>
+                <span id="genderError" class="error"></span><br><br>
+                <button type="submit">Submit Query</button>
+            </form>
+    </div>
+
+    <script>
+        document.getElementById('myForm').addEventListener('submit',
+            function (event) {
+                event.preventDefault();
+
+                document.getElementById('nameError').textContent = '';
+                document.getElementById('commentError').textContent = '';
+                document.getElementById('genderError').textContent = '';
+
+                const nameInput = document.getElementById('name');
+                const commentInput = document.getElementById('comments');
+
+                const name = document.getElementById('name').value.trim();
+                const comments = document.getElementById('comments').value.trim();
+                const genderSelected = document.querySelector('input[name="gender"]:checked');
+
+                let isValid = true;
+
+                if (!name && !comments) {
+                    document.getElementById('nameError').textContent = 'Name is missing';
+                    document.getElementById('commentError').textContent = 'Comment is missing';
+                    nameInput.focus();
+                    isValid = false;
+                } else {
+                    if (!name) {
+                        document.getElementById('nameError').textContent = 'Name is missing';
+                        nameInput.focus();
+                        isValid = false;
+                    }
+                    if (!comments) {
+                        document.getElementById('commentError').textContent = 'Comment is missing';
+                        commentInput.focus();
+                        isValid = false;
+                    }
+                }
+
+                if (!genderSelected) {
+                    document.getElementById('genderError').textContent = 'Please select gender';
+                    isValid = false;
+                }
+
+                if (isValid) {
+                    alert("Form submitted successfully!");
+                    document.getElementById('myForm').reset()
+                }
+            }
+        )
+    </script>
+
+
+</body>
+
+</html>

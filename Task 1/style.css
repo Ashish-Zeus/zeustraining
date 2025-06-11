@@ -1,0 +1,47 @@
+.body{
+    background-color: #ffffcc;
+}
+.container{
+    font-family: sans-serif;
+}
+.header{
+    background-color: rgb(167, 5, 5);
+    text-align: center;
+    letter-spacing: 0.35em;
+    word-spacing: 0.15em;
+    color: #ffffcc;
+    border-bottom: 20px solid red;
+    padding: 5px;
+}
+#green{
+    background: rgb(31, 173, 31);
+    padding: 5px;
+    color: white;
+}
+
+.lists{
+    color: maroon;
+}
+
+#grey{
+    color: rgb(170, 170, 170);
+}
+
+.t1{
+    border: 1px solid black;
+    background: rgb(218, 217, 217);
+}
+
+#upper{
+    text-transform: uppercase ;
+    font-style: italic;
+}
+
+.img1{
+    border: 3px dotted rgb(170, 170, 170);
+}
+
+.error{
+    color: red;
+    font-size: 0.9em;
+}
