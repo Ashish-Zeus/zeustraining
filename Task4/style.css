@@ -1,0 +1,80 @@
+body{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  display: grid;
+  grid-template-areas:
+    "header header"
+    "sidebar content"
+    "footer footer";
+  grid-template-columns: 1fr 3fr;
+  grid-template-rows: 2fr 12fr 3fr;
+  gap: 2px;
+  min-width: 500px;
+  min-height: 400px;
+  color: white;
+}
+
+.container > div.header {
+  grid-area: header;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: linear-gradient(to right, #6750ca , #af98eb) ;
+  border: 1px solid black;
+}
+.container > div.sidebar {
+  grid-area: sidebar;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image:linear-gradient(to bottom, #33ddd5, #2bc5c0);
+  border: 1px solid black;
+}
+.container > div.content {
+  display: grid;
+  grid-area: content;
+  grid-template-areas:
+    "content1 content1"
+    "content2 content3";
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+}
+.container > div.footer {
+  grid-area: footer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image:linear-gradient(to right, #8a6cf5, #b49ef3);
+  border: 1px solid black;
+}
+
+.content1 {
+  grid-column: 1 / span 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid black;
+  background-image: linear-gradient(135deg, #8368f0 2%, #4ebafd 80%, #52edf8 99%);
+}
+
+.content2 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid black;
+  background-image: linear-gradient(135deg, #8368f0 2%, #4ebafd 80%, #52edf8 95%);
+}
+
+.content3 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid black;
+  background-image: linear-gradient(135deg, #8368f0 2%, #4ebafd 80%, #52edf8 95%);
+}
