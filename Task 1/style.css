@@ -51,3 +51,8 @@ b{
     color: red;
     font-size: 0.9em;
 }
+
+.radio-focus {
+    outline: 2px solid black;
+    outline-offset: 2px;
+}

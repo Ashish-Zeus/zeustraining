@@ -28,7 +28,8 @@
             <li>Here I have created ordered and unordered list</li>
         </ul>
         <h2 id="green">ZeusLearning.com</h2>
-        <a href="https://www.zeuslearning.com/" target="_blank" class="zlink">This link will open zeuslearning.com in new tab</a>
+        <a href="https://www.zeuslearning.com/" target="_blank" class="zlink">This link will open zeuslearning.com in
+            new tab</a>
         <h2 id="green">On click of following image navigate to Google.com</h1>
             <a href="https://www.google.com/">
                 <img src="google.png" alt="Google" class="img1">
@@ -74,52 +75,63 @@
     </div>
 
     <script>
-        document.getElementById('myForm').addEventListener('submit',
-            function (event) {
-                event.preventDefault();
+        const genderInputs = document.querySelectorAll('input[name="gender"]');
+        const maleInput = document.getElementById('male');
 
-                document.getElementById('nameError').textContent = '';
-                document.getElementById('commentError').textContent = '';
-                document.getElementById('genderError').textContent = '';
+        document.getElementById('myForm').addEventListener('submit', function (event) {
+            event.preventDefault();
 
-                const nameInput = document.getElementById('name');
-                const commentInput = document.getElementById('comments');
+            document.getElementById('nameError').textContent = '';
+            document.getElementById('commentError').textContent = '';
+            document.getElementById('genderError').textContent = '';
 
-                const name = document.getElementById('name').value.trim();
-                const comments = document.getElementById('comments').value.trim();
-                const genderSelected = document.querySelector('input[name="gender"]:checked');
+            const nameInput = document.getElementById('name');
+            const commentInput = document.getElementById('comments');
+            const genderSelected = document.querySelector('input[name="gender"]:checked');
 
-                let isValid = true;
+            const name = nameInput.value.trim();
+            const comments = commentInput.value.trim();
 
-                if (!name && !comments) {
+            let isValid = true;
+
+            if (!name && !comments) {
+                document.getElementById('nameError').textContent = 'Name is missing';
+                document.getElementById('commentError').textContent = 'Comment is missing';
+                nameInput.focus();
+                isValid = false;
+            } else {
+                if (!name) {
                     document.getElementById('nameError').textContent = 'Name is missing';
-                    document.getElementById('commentError').textContent = 'Comment is missing';
                     nameInput.focus();
                     isValid = false;
-                } else {
-                    if (!name) {
-                        document.getElementById('nameError').textContent = 'Name is missing';
-                        nameInput.focus();
-                        isValid = false;
-                    }
-                    if (!comments) {
-                        document.getElementById('commentError').textContent = 'Comment is missing';
-                        commentInput.focus();
-                        isValid = false;
-                    }
                 }
-
-                if (!genderSelected) {
-                    document.getElementById('genderError').textContent = 'Please select gender';
+                if (!comments) {
+                    document.getElementById('commentError').textContent = 'Comment is missing';
+                    commentInput.focus();
                     isValid = false;
                 }
-
-                if (isValid) {
-                    alert("Form submitted successfully!");
-                    document.getElementById('myForm').reset()
-                }
             }
-        )
+
+            if (!genderSelected) {
+                document.getElementById('genderError').textContent = 'Please select gender';
+                maleInput.classList.add('radio-focus');
+                isValid = false;
+            }
+
+            if (isValid) {
+                alert("Form submitted successfully!");
+                document.getElementById('myForm').reset();
+            }
+        });
+
+        genderInputs.forEach(input => {
+            input.addEventListener('change', () => {
+                document.getElementById('genderError').textContent = '';
+                maleInput.classList.remove('radio-focus');
+            });
+        });
+
+
     </script>
 
 
