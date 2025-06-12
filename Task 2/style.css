@@ -10,10 +10,8 @@ body {
 
 .tweet-card {
     background-color: #fff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     display: flex;
     margin: 4px;
-    padding: 4px;
     max-height: 138px;
     width: 457px;
 }
