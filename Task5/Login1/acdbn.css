@@ -1,0 +1,162 @@
+.login_form {
+    padding: 20px 30px;
+    position: relative;
+}
+
+.blue_area {
+    height: 5px;
+    background-color: #2ec4b6;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+.login_form img[alt="back-button"] {
+    cursor: pointer;
+    margin: 10px 0;
+}
+
+.form_head {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.school_type {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.school-type-text {
+    margin-right: 20px;
+    font-size: 14px;
+}
+
+.state,
+.district {
+    margin-bottom: 15px;
+}
+
+label {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+}
+
+select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.username,
+.password {
+    margin-bottom: 15px;
+    position: relative;
+}
+
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.username label,
+.password label {
+    display: block;
+    font-size: 12px;
+    color: #2ec4b6;
+    margin-top: 5px;
+    cursor: pointer;
+}
+
+.password img {
+    position: absolute;
+    top: 38px;
+    right: 10px;
+    width: 20px;
+    cursor: pointer;
+}
+
+.remember {
+    display: flex;
+    align-items: center;
+    margin: 10px 0 20px 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.remember img {
+    margin-right: 8px;
+}
+
+.log_in_button {
+    text-align: center;
+}
+
+.log_in_button button {
+    background-color: #2ec4b6;
+    color: white;
+    padding: 12px 30px;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s;
+}
+
+.log_in_button button:hover {
+    background-color: #28b3a8;
+}
+
+.footer {
+    margin-top: 30px;
+    background-color: #fff;
+    padding: 20px 0;
+    text-align: center;
+    border-top: 1px solid #eee;
+}
+
+.footer_head span {
+    margin: 0 10px;
+    color: #2ec4b6;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.footer_contents {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    margin-top: 15px;
+    gap: 20px;
+}
+
+.footer_content_left img {
+    height: 30px;
+}
+
+.footer_content_right {
+    text-align: left;
+    font-size: 12px;
+    color: #777;
+}
+
+.footer_copright,
+.footer_zeus_system,
+.footer_rights {
+    line-height: 1.6;
+}

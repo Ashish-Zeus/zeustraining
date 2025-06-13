@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Login 1</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <img class="header-image" src="..\quantum-screen-assets\header-pattern-image.png" alt="header-img">
+            <img class="header-icon" src="../quantum-screen-assets/icons/logo used in header.svg" alt="header-icon">
+        </div>
+        <div class="login_container">
+            <div class="login_form">
+                <form action="Login">
+                    <div class="form_header">
+                        <div class="back_button">
+                            <img class="back_button_image" src="../quantum-screen-assets/icons/back.svg"
+                                alt="back-button">
+                        </div>
+                        <div class="form_head_text">Log in with Quantum</div>
+                    </div>
+                    <div class="school_type">
+                        <div class="district_school">
+                            <img class="radio_button" src="../quantum-screen-assets/icons/radio-button-on.svg"
+                                alt="selected_button">
+                            <span class="school-type-text">District</span>
+                        </div>
+                        <div class="independent_school">
+                            <img class="radio_button" src="../quantum-screen-assets/icons/radio-button-off.svg"
+                                alt="unselected_button">
+                            <span class="school-type-text">Independent School</span>
+                        </div>
+                    </div>
+                    <div class="state">
+                        <label class="stateLabel" for="stateLabel">State*</label><br>
+                        <div class="state_input_box">
+                            <select name="states" id="stateDropDown">
+                                <option value="Alabama">Alabama</option>
+                            </select>
+                            <img class="dropdown-arrow" src="../quantum-screen-assets/icons/arrow-down.svg"
+                                alt="DropDown-Arrow">
+                        </div>
+                    </div>
+                    <div class="district">
+                        <label class="districtLabel" for="districtLabel">District*</label><br>
+                        <div class="district_input_box">
+                            <select name="districts" id="districtDropDown">
+                                <option value="Alabama_School_District">Alabama School District</option>
+                            </select>
+                            <img class="dropdown-arrow" src="../quantum-screen-assets/icons/arrow-down.svg"
+                                alt="DropDown-Arrow">
+                        </div>
+                    </div>
+                    <div class="username">
+                        <div class="username_input_box">
+                            <input type="text" placeholder="Username/Email"><br>
+                        </div>
+                        <label class="label_forgot" for="forgotUsername">FORGOT USERNAME?</label>
+                    </div>
+                    <div class="password">
+                        <div class="password_input_box">
+                            <input type="password" name="password" id="password" placeholder="Password"> <img
+                                class="preview_image" src="../quantum-screen-assets/icons/preview.svg"
+                                alt="Preview_pass"><br>
+                        </div>
+                        <label class="label_forgot" for="forgotPassword">FORGOT PASSWORD?</label>
+                    </div>
+                    <div class="remember">
+                        <div class="check_box"><img src="../quantum-screen-assets/icons/checkbox-checked.svg" alt="checkbox"></div>
+                        <div class="remember_me">Remember Me</div>
+                    </div>
+                    <div class="login_button">
+                        <button type="button">LOG IN</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="footer">
+            <div class="footer_head">
+                <span>About</span>
+                <span>|</span>
+                <span>Contact Us</span>
+            </div>
+            <div class="footer_footer">
+                <div class="footer_contents">
+                    <div class="footer_content_left">
+                        <img src="../quantum-screen-assets/icons/logo used in footer.svg" alt="Footer_logo">
+                    </div>
+                    <div class="footer_content_mid"></div>
+                    <div class="footer_content_right">
+                        <div class="footer_copright">Copyright © 2020-2021</div>
+                        <div class="footer_zeus_system">Zeus Systems Pvt. Ltd.</div>
+                        <div class="footer_rights">All rights reserved.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
