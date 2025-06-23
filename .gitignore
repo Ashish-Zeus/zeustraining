@@ -1,0 +1,9 @@
+node_modules
+.vscode
+package-lock.json
+package.json
+Task5/quantum-screen-assets
+Task5/Dashboard/ann_menu
+Task5/Dashboard/styles
+Task5/Dashboard/style.css
+Task5/Dashboard/index.js
