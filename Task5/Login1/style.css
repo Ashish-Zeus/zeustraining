@@ -220,22 +220,13 @@ input::-ms-clear {
 
 .remember {
     display: flex;
-    /* justify-content: start; */
     align-items: center;
     gap: 5px;
-    /* height: 24px; */
 }
 
-/* .check_box {
-    width: 18px;
-    height: 24px;
-    left: 0;
-} */
 
 img[alt="checkbox"] {
     cursor: pointer;
-    /* width: 100%;
-    height: 100%; */
 }
 
 .remember_me {

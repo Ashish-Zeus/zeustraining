@@ -1,0 +1,286 @@
+$color_1: #222222;
+$color_2: #666666;
+$color_3: #1F7A54;
+$font-family_1: quicksand;
+$background-color_1: #EEEEEE;
+$background-color_2: black;
+$background-color_3: #FFFFFF;
+$background-color_4: #E0E1E1;
+
+@font-face {
+	font-family: "quicksand";
+	src: url(../quantum-screen-assets/Quicksand-font/Quicksand-VariableFont_wght.ttf);
+}
+
+@mixin flex-box($justify: center, $align: center) {
+    display: flex;
+    justify-content: $justify;
+    align-items: $align;
+}
+
+@mixin font-style($size: 16px, $weight: 500) {
+    font-size: $size;
+    font-weight: $weight;
+}
+
+* {
+	font-family: $font-family_1;
+}
+body {
+	margin: 0;
+}
+.container {
+	background-color: $background-color_1;
+	overflow: hidden;
+	height: 100vh;
+}
+.header {
+	position: relative;
+	height: 60px;
+	background-color: $background-color_2;
+	border-bottom: 2px solid #3AC7EC;
+}
+.header-image {
+	width: 100%;
+	height: 60px;
+	object-fit: cover;
+	opacity: 0.5;
+}
+.header-icon {
+	position: absolute;
+	top: 10px;
+	left: 20px;
+	height: 40px;
+}
+.login_container {
+
+    @include flex-box(center, center);
+	height: 85vh;
+}
+.login_form {
+	background-color: $background-color_3;
+	height: 580.5px;
+	width: 488px;
+	border-top: 4px solid #3AC7EC;
+	border-radius: 2px 2px 0px 0px;
+	background: #FFFFFF 0% 0% no-repeat padding-box;
+}
+form {
+	margin-top: 20px;
+	margin-left: 32px;
+	margin-right: 32px;
+}
+.form_header {
+	display: flex;
+	flex-direction: row;
+	gap: 77px;
+}
+.back_button {
+	height: 26px;
+	width: 17px;
+	left: 0;
+}
+img[alt="back-button"] {
+	cursor: pointer;
+}
+.form_head_text {
+
+    @include font-style(24px, 600);
+	color: $color_1;
+	margin: 0px;
+}
+.school_type {
+	padding-top: 30px;
+	display: flex;
+	gap: 32px;
+
+    @include font-style(16px, 500);
+}
+.radio_button {
+	height: 24px;
+	width: 20px;
+}
+.district_school {
+
+    @include flex-box(center, center);
+	gap: 8px;
+    cursor: pointer;
+}
+.independent_school {
+
+    @include flex-box(center, center);
+	gap: 8px;
+    cursor: pointer;
+}
+.state {
+	margin-top: 25px;
+	height: 45px;
+	width: 424px;
+	height: 45px;
+	border-bottom: 1px solid rgb(212, 212, 212);
+}
+.stateLabel {
+    @include font-style(12px, 500);
+	color: $color_2;
+}
+.districtLabel {
+    @include font-style(12px, 500);
+	color: $color_2;
+}
+select {
+	border: 0;
+	appearance: none;
+	width: 448px;
+	outline: none;
+	box-shadow: none;
+    @include font-style(16px, 550);
+	color: $color_1;
+}
+.district {
+	margin-top: 36px;
+	height: 45px;
+	border-bottom: 1px solid rgb(212, 212, 212);
+}
+.dropdown-arrow {
+	cursor: pointer;
+	pointer-events: none;
+	position: absolute;
+	right: 0;
+}
+.username {
+	margin-top: 56px;
+}
+input {
+	appearance: none;
+	border: 0;
+	width: 448px;
+	outline: none;
+	font-size: 16px;
+	&::placeholder {
+		color: $color_2;
+        @include font-style(16px, 500);
+	}
+	&::-ms-clear {
+		display: none;
+	}
+}
+.username_input_box {
+	border-bottom: 1px solid rgb(212, 212, 212);
+	height: 25px;
+
+    @include flex-box(space-between, center);
+}
+.state_input_box {
+	height: 30px;
+	position: relative;
+	
+    @include flex-box(space-between, center);
+}
+.district_input_box {
+	height: 30px;
+	position: relative;
+
+    @include flex-box(space-between, center);
+}
+.password {
+	margin-top: 33px;
+}
+.password_input_box {
+
+    @include flex-box(space-between, center);
+	border-bottom: 1px solid rgb(212, 212, 212);
+	height: 25px;
+	width: 424px;
+}
+input[type="password"] {
+	&::-ms-reveal {
+		display: none;
+	}
+}
+.preview_image {
+	height: 15px;
+	width: 22px;
+}
+.label_forgot {
+	margin-top: 5px;
+    @include font-style(14px, 580);
+	color: $color_3;
+	display: flex;
+	justify-content: end;
+}
+.remember {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+}
+img[alt="checkbox"] {
+	cursor: pointer;
+}
+.remember_me {
+	font: normal normal medium 16px/20px Quicksand;
+	
+    @include font-style(16px, 580);
+	color: $color_1;
+}
+.login_button {
+	margin-top: 18px;
+
+    @include flex-box(center, center);
+}
+button {
+	margin-top: 14px;
+	margin-bottom: 24px;
+	width: 216px;
+	height: 40px;
+	background: #3FD28B 0% 0% no-repeat padding-box;
+	box-shadow: 0px 3px 5px #0000003D;
+	border: 0;
+    @include font-style(14px, 500);
+}
+.footer {
+
+    @include flex-box(center, center);
+	flex-direction: column;
+	position: fixed;
+	bottom: 0;
+	width: 100vw;
+}
+.footer_head {
+	margin: 0px 10px;
+	margin-bottom: 10px;
+
+    @include flex-box(center, center);
+	gap: 9px;
+}
+.footer_head_left {
+	color: $color_3;
+    @include font-style(14px, 550);
+}
+.footer_head_right {
+	color: $color_3;
+    @include font-style(14px, 550);
+}
+.footer_head_mid {
+	height: 18px;
+	border: 1px solid #0000001F;
+}
+.footer_contents {
+
+    @include flex-box(center, center);
+	flex-direction: row;
+	background-color: $background-color_4;
+	width: 100vw;
+	height: 50px;
+	margin-top: 6px;
+	gap: 20px;
+}
+.footer_content_mid {
+	height: 24px;
+	border: 1px solid #0000001F;
+}
+.footer_content_right {
+
+    @include flex-box(center, center);
+	gap: 20px;
+	font: normal normal medium 12px/16px;
+}
