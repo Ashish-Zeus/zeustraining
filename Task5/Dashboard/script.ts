@@ -40,7 +40,7 @@ const alerts: Alert[] = [
         tick: "untick.png",
         date: "15-Sep-2018 at 07:21 pm",
         background: "#FFFFEE",
-        course: null, // fixed typo from 'couse'
+        course: null,
         class: "Basics of Algebra"
     },
     {
