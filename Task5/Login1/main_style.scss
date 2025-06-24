@@ -191,6 +191,7 @@ input {
 	border-bottom: 1px solid rgb(212, 212, 212);
 	height: 25px;
 	width: 424px;
+	position: relative;
 }
 input[type="password"] {
 	&::-ms-reveal {
@@ -200,6 +201,8 @@ input[type="password"] {
 .preview_image {
 	height: 15px;
 	width: 22px;
+	position: absolute;
+	right: 0;
 }
 .label_forgot {
 	margin-top: 5px;
@@ -283,4 +286,26 @@ button {
     @include flex-box(center, center);
 	gap: 20px;
 	font: normal normal medium 12px/16px;
+}
+
+
+@media screen and (max-width: 550px) {
+	.login_form {
+		width: 90%;
+	}
+
+	.state,.password_input_box, input {
+		width: 100%;
+	}
+
+	.footer_contents {
+		font-size: 12px;
+	}
+}
+
+@media screen and (max-width: 390px) {
+	.login_form {
+		height: 600px;
+	}
+	
 }
