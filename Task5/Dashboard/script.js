@@ -54,7 +54,34 @@
         var card = document.createElement('div');
         card.className = 'alerts_contents';
         card.style.backgroundColor = item.background;
-        card.innerHTML = "\n        <div class=\"alerts_contents_head\">\n            <div class=\"alerts_contents_body\">".concat(item.body, "</div>\n            <div class=\"alerts_contents_head_img\">\n                <img src=\"../quantum-screen-assets/icons/").concat(item.tick, "\" alt=\"").concat(item.tick, "\">\n            </div>\n        </div>\n        ").concat(item.course ? "<div class=\"alerts_contents_course\"><span class=\"alerts_course_1\">Course:</span> <span class=\"alerts_course_2\">".concat(item.course, "</span></div>") : "".concat(item.class ? "<div class=\"alerts_contents_course\"><span class=\"alerts_course_1\">Class:</span> <span class=\"alerts_course_2\">".concat(item.class, "</span></div>") : ""), "\n        <div class=\"alerts_contents_bottom\" style=\"").concat(item.attachments ? '' : 'display:flex; justify-content:end;', "\">\n            <div class=\"alerts_contents_bottom_1\">\n                ").concat(item.attachments ? "<img src=\"../quantum-screen-assets/icons/attachment.png\" alt=\"attachment\">" : '', "\n            </div>\n            <div class=\"alerts_contents_bottom_2\">\n                ").concat(item.attachments ? "".concat(item.files, " file").concat(item.files && item.files > 1 ? 's' : '', " are attached") : '', "    \n            </div>\n            <div class=\"alerts_contents_bottom_3\">").concat(item.date, "</div>\n        </div>\n    ");
+        
+        card.innerHTML =
+            `<div class="alerts_contents_head">
+                <div class="alerts_contents_body">${item.body}</div>
+                <div class="alerts_contents_head_img">
+                    <img src="../quantum-screen-assets/icons/${item.tick}" alt="${item.tick}">
+                </div>
+            </div>
+            ${
+                item.course
+                    ? `<div class="alerts_contents_course"><span class="alerts_course_1">Course:</span> <span class="alerts_course_2">${item.course}</span></div>`
+                    : item.class
+                        ? `<div class="alerts_contents_course"><span class="alerts_course_1">Class:</span> <span class="alerts_course_2">${item.class}</span></div>`
+                        : ''
+            }
+            <div class="alerts_contents_bottom" style="${item.attachments ? '' : 'display:flex; justify-content:end;'}">
+                <div class="alerts_contents_bottom_1">
+                    ${item.attachments ? `<img src="../quantum-screen-assets/icons/attachment.png" alt="attachment">` : ''}
+                </div>
+                <div class="alerts_contents_bottom_2">
+                    ${
+                        item.attachments
+                            ? `${item.files} file${item.files && item.files > 1 ? 's' : ''} are attached`
+                            : ''
+                    }
+                </div>
+                <div class="alerts_contents_bottom_3">${item.date}</div>
+            </div>`;
         alertsContainer === null || alertsContainer === void 0 ? void 0 : alertsContainer.appendChild(card);
     });
     var announcements = [
@@ -114,7 +141,28 @@
         var card = document.createElement('div');
         card.className = 'announcements_contents';
         card.style.backgroundColor = item.background;
-        card.innerHTML = "\n        <div class=\"announcements_contents_head\">\n            <div class=\"announcements_contents_head_title\"><span class=\"head_title_1\">PA:</span> <span class=\"head_title_2\">".concat(item.pa, "</span></div>\n            <div class=\"announcements_contents_head_img\">\n                <img src=\"../quantum-screen-assets/icons/").concat(item.tick, "\" alt=\"").concat(item.tick, "\">\n            </div>\n        </div>\n        <div class=\"announcements_contents_body\">").concat(item.body, "</div>\n        ").concat(item.course ? "<div class=\"announcements_contents_course\">Course: ".concat(item.course, "</div>") : '', "\n        <div class=\"announcements_contents_bottom\" style=\"").concat(item.attachments ? '' : 'display:flex; justify-content:end;', "\">\n            <div class=\"announcements_contents_bottom_1\">\n                ").concat(item.attachments ? "<img src=\"../quantum-screen-assets/icons/attachment.png\" alt=\"attachment\">" : '', "\n            </div>\n            <div class=\"announcements_contents_bottom_2\">\n                ").concat(item.attachments ? "".concat(item.files, " file").concat(item.files > 1 ? 's' : '', " are attached") : '', "\n            </div>\n            <div class=\"announcements_contents_bottom_3\">").concat(item.date, "</div>\n        </div>\n    ");
+        card.innerHTML = `
+                <div class="announcements_contents_head">
+                    <div class="announcements_contents_head_title">
+                        <span class="head_title_1">PA:</span>
+                        <span class="head_title_2">${item.pa}</span>
+                    </div>
+                    <div class="announcements_contents_head_img">
+                        <img src="../quantum-screen-assets/icons/${item.tick}" alt="${item.tick}">
+                    </div>
+                </div>
+                <div class="announcements_contents_body">${item.body}</div>
+                ${item.course ? `<div class="announcements_contents_course">Course: ${item.course}</div>` : ''}
+                <div class="announcements_contents_bottom" style="${item.attachments ? '' : 'display:flex; justify-content:end;'}">
+                    <div class="announcements_contents_bottom_1">
+                        ${item.attachments ? `<img src="../quantum-screen-assets/icons/attachment.png" alt="attachment">` : ''}
+                    </div>
+                    <div class="announcements_contents_bottom_2">
+                        ${item.attachments ? `${item.files} file${item.files > 1 ? 's' : ''} are attached` : ''}
+                    </div>
+                    <div class="announcements_contents_bottom_3">${item.date}</div>
+                </div>
+            `;
         announcement_container === null || announcement_container === void 0 ? void 0 : announcement_container.appendChild(card);
     });
     var data = [
@@ -199,9 +247,58 @@
     data.forEach(function (item) {
         var card = document.createElement('div');
         card.className = 'card_1';
-        card.innerHTML = "\n        <div class=\"card_content\">\n            ".concat(item.expired === "" ? "" : "<div class=\"expired_container\">".concat(item.expired, "</div>"), "\n            <div class=\"main_card_content\">\n                <div class=\"card_image_container\">\n                    <img src=\"").concat(item.image, "\" alt=\"card_1_image\">\n                </div>\n                <div class=\"card_details\">\n                    <div class=\"card_head\">\n                        <div class=\"card_title\">").concat(item.title, "</div>\n                        <img src=\"../quantum-screen-assets/icons/favourite.svg\" alt=\"favourite_icon\"\n                            style=\"").concat(item.starred ? '' : 'filter: grayscale(100%);', "\">\n                    </div>\n                    <div class=\"card_subject_grade\"").concat(item.title === "Acceleration" ? 'style="margin-top:3px"' : ' style="margin-top:7px"', ">\n                        <div class=\"card_subject\">").concat(item.subject || '', "</div>\n                        <div class=\"div_line\"></div>\n                        <div class=\"card_grade\">").concat(item.grade, "\n                            <div class=\"card_additional_grade\">").concat(item.additionalGrade, "</div>\n                        </div>\n                    </div>\n                    <div class=\"card_course_details\">\n                        <div class=\"course_contents\">\n                            ").concat(item.units ? "<span><span class=\"numbers\">".concat(item.units, "</span> units</span>") : '', "\n                            ").concat(item.lessons ? "<span><span class=\"numbers\">".concat(item.lessons, "</span> lessons</span>") : '', "\n                            ").concat(item.topics ? "<span><span class=\"numbers\">".concat(item.topics, "</span> Topics</span>") : '', "\n                        </div>\n                        ").concat(item.class.length === 0 ? "<div class=\"class_selection_box\" style:'border-bottom: 1px solid rgba(0,0,0,0.12);'>" : "<div class=\"class_selection_box\">", "\n                            ").concat(item.class.length === 0 ?
-            "<select name=\"course_select\" id=\"course_select\" disabled style:'color:##222222; opacity:0.4; font-weight: 400;'> <option>No Classes</option>"
-            : "<select name=\"course_select\" id=\"course_select\"> ".concat(item.class ? "<option>".concat(item.class, "</option>") : ''), "\n                            </select>\n                            <img class=\"dropdown_arrow\" src=\"../quantum-screen-assets/icons/arrow-down.svg\" alt=\"dropdown_arrow\">\n                        </div>\n                        <div class=\"course_capacity\">\n                            ").concat(item.students ? "<div class=\"course_students\">".concat(item.students, "</div>") : '', "\n                            ").concat(item.duration ? "<div class=\"div_line\"></div> <div class=\"course_duration\">".concat(item.duration, "</div>") : '', "\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n        <div class=\"card_icons\">\n            <div class=\"icon_extreme\"><img src=\"../quantum-screen-assets/icons/preview.svg\" alt=\"preview_image\" style=\"").concat(item.icon1 ? '' : 'opacity:0.4', "\"></div>\n            <div class=\"icon_mid\"><img src=\"../quantum-screen-assets/icons/manage course.svg\" alt=\"manage_course\" style=\"").concat(item.icon2 ? '' : 'opacity:0.4', "\"></div>\n            <div class=\"icon_mid\"><img src=\"../quantum-screen-assets/icons/grade submissions.svg\" alt=\"grade_submission\" style=\"").concat(item.icon3 ? '' : 'opacity:0.4', "\"></div>\n            <div class=\"icon_extreme\"><img src=\"../quantum-screen-assets/icons/reports.svg\" alt=\"reports_image\" style=\"").concat(item.icon4 ? '' : 'opacity:0.4', "\"></div>\n        </div>\n    ");
+        card.innerHTML = `
+            <div class="card_content">
+                ${item.expired === "" ? "" : `<div class="expired_container">${item.expired}</div>`}
+                <div class="main_card_content">
+                    <div class="card_image_container">
+                        <img src="${item.image}" alt="card_1_image">
+                    </div>
+                    <div class="card_details">
+                        <div class="card_head">
+                            <div class="card_title">${item.title}</div>
+                            <img src="../quantum-screen-assets/icons/favourite.svg" alt="favourite_icon"
+                                style="${item.starred ? '' : 'filter: grayscale(100%);'}">
+                        </div>
+                        <div class="card_subject_grade" ${item.title === "Acceleration" ? 'style="margin-top:3px"' : 'style="margin-top:7px"'}>
+                            <div class="card_subject">${item.subject || ''}</div>
+                            <div class="div_line"></div>
+                            <div class="card_grade">${item.grade}
+                                <div class="card_additional_grade">${item.additionalGrade}</div>
+                            </div>
+                        </div>
+                        <div class="card_course_details">
+                            <div class="course_contents">
+                                ${item.units ? `<span><span class="numbers">${item.units}</span> units</span>` : ''}
+                                ${item.lessons ? `<span><span class="numbers">${item.lessons}</span> lessons</span>` : ''}
+                                ${item.topics ? `<span><span class="numbers">${item.topics}</span> Topics</span>` : ''}
+                            </div>
+                            ${item.class.length === 0
+                                ? `<div class="class_selection_box" style='border-bottom: 1px solid rgba(0,0,0,0.12);'>`
+                                : `<div class="class_selection_box">`
+                            }
+                                ${
+                                    item.class.length === 0
+                                        ? `<select name="course_select" id="course_select" disabled style='color:#222222; opacity:0.4; font-weight: 400;'><option>No Classes</option></select>`
+                                        : `<select name="course_select" id="course_select">${item.class ? `<option>${item.class}</option>` : ''}</select>`
+                                }
+                                <img class="dropdown_arrow" src="../quantum-screen-assets/icons/arrow-down.svg" alt="dropdown_arrow">
+                            </div>
+                            <div class="course_capacity">
+                                ${item.students ? `<div class="course_students">${item.students}</div>` : ''}
+                                ${item.duration ? `<div class="div_line"></div> <div class="course_duration">${item.duration}</div>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card_icons">
+                <div class="icon_extreme"><img src="../quantum-screen-assets/icons/preview.svg" alt="preview_image" style="${item.icon1 ? '' : 'opacity:0.4'}"></div>
+                <div class="icon_mid"><img src="../quantum-screen-assets/icons/manage course.svg" alt="manage_course" style="${item.icon2 ? '' : 'opacity:0.4'}"></div>
+                <div class="icon_mid"><img src="../quantum-screen-assets/icons/grade submissions.svg" alt="grade_submission" style="${item.icon3 ? '' : 'opacity:0.4'}"></div>
+                <div class="icon_extreme"><img src="../quantum-screen-assets/icons/reports.svg" alt="reports_image" style="${item.icon4 ? '' : 'opacity:0.4'}"></div>
+            </div>
+        `;
         container === null || container === void 0 ? void 0 : container.appendChild(card);
     });
 

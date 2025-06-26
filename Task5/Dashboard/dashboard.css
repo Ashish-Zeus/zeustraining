@@ -4,9 +4,19 @@
 }
 * {
   font-family: quicksand;
-  -webkit-tap-highlight-color: transparent; /* For Safari and Chrome */
-  -webkit-focus-ring-color: transparent; /* For focus rings */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-focus-ring-color: transparent;
   outline: none;
+}
+
+html, body {
+  min-height: 100vh;
+}
+
+body, .container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 body {
@@ -45,7 +55,6 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   justify-content: space-between;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
   background-image: url(../quantum-screen-assets/header-pattern-image.png);
 }
 
@@ -68,7 +77,6 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   justify-content: center;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
   gap: 32px;
   margin-right: 24px;
   font-weight: 550;
@@ -99,7 +107,6 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   justify-content: center;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
   height: 100%;
 }
 
@@ -108,7 +115,6 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   justify-content: center;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
   height: 100%;
 }
 
@@ -124,7 +130,6 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   justify-content: center;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
   height: 100%;
 }
 
@@ -133,7 +138,6 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   justify-content: center;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
   height: 100%;
 }
 
@@ -142,7 +146,6 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   justify-content: center;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
   position: relative;
   cursor: pointer;
   height: 35px;
@@ -161,7 +164,6 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   justify-content: center;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
   position: relative;
   cursor: pointer;
   height: 35px;
@@ -180,7 +182,6 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   justify-content: center;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
   position: relative;
   cursor: pointer;
   height: 35px;
@@ -199,7 +200,6 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   justify-content: center;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
   position: absolute;
   top: 18px;
   right: -5px;
@@ -215,7 +215,6 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   justify-content: center;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
   position: absolute;
   top: 18px;
   right: -11px;
@@ -232,7 +231,6 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   justify-content: center;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
   position: absolute;
   top: 18px;
   right: -2px;
@@ -298,7 +296,6 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   justify-content: space-between;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
   height: 48px;
   cursor: pointer;
 }
@@ -331,7 +328,6 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   justify-content: flex-start;
   align-items: center;
   flex-direction: column;
-  flex-wrap: nowrap;
   width: 100%;
   background-color: #FFFFFF;
   max-height: 534px;
@@ -345,7 +341,6 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   justify-content: flex-start;
   align-items: center;
   flex-direction: column;
-  flex-wrap: nowrap;
   padding: 16px;
   width: 283px;
   gap: 5px;
@@ -357,7 +352,6 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   justify-content: space-between;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
   width: 100%;
   font-size: 12px;
 }
@@ -544,7 +538,6 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   justify-content: center;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
   background-color: #FFFFFF;
   position: absolute;
   bottom: 0;
@@ -557,22 +550,13 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   font-weight: 600;
 }
 
-.dashboard {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: row;
-  flex-wrap: nowrap;
-}
-
 .dashboard_container {
   margin: 84px 24px 33px;
+  flex: 1 0 auto;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  flex-wrap: nowrap;
-  width: 976px;
 }
 
 .selection_bar {
@@ -580,7 +564,6 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   justify-content: center;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
   background-color: #8DDC97;
   width: 100%;
   height: 64px;
@@ -592,7 +575,6 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   justify-content: center;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
   height: 100%;
   width: 50%;
   gap: 8px;
@@ -603,7 +585,6 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   justify-content: center;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
   height: 100%;
   width: 50%;
 }
@@ -658,9 +639,9 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   justify-content: space-between;
   align-items: baseline;
   flex-direction: row;
-  flex-wrap: nowrap;
   height: 28px;
   margin-bottom: 17px;
+  flex-wrap: wrap;
 }
 
 .sorting_box {
@@ -694,7 +675,6 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   justify-content: space-between;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
 }
 
@@ -737,7 +717,6 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   justify-content: center;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
   flex-wrap: wrap;
   gap: 24px;
   margin-top: 16px;
@@ -745,19 +724,20 @@ body:has(.alerts_main_container:hover) .header_alerts div {
 }
 
 .card_1 {
-  width: 476px;
-  height: 246px;
+  max-width: 517px;
+  width: 100%;
+  height: auto;
+  flex-basis: 517px;
   background-color: #FFFFFF;
   border-radius: 2px;
+  padding: 24px 24px 8px;
+  box-sizing: border-box;
+  flex: 1 1 517px;
+  position: relative;
 }
 
 .card_content {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: start;
-  flex-direction: column;
-  flex-wrap: nowrap;
+  width: 100%;
 }
 
 .expired_container {
@@ -775,25 +755,43 @@ body:has(.alerts_main_container:hover) .header_alerts div {
 
 .main_card_content {
   display: flex;
-  margin-top: 24px;
-  margin-left: 24px;
-  height: 173px;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  width: 100%;
 }
 
 .card_details {
-  margin-left: 16px;
-  width: 288px;
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.card_image_container {
+  margin: 0;
+}
+.card_image_container img {
+  width: 132px;
 }
 
 .card_head {
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: start;
   flex-direction: row;
-  flex-wrap: nowrap;
 }
 .card_head img {
   cursor: pointer;
+}
+
+.card_course_details {
+  width: 100%;
+}
+
+.card_details {
+  width: 100%;
 }
 
 .card_subject_grade {
@@ -801,7 +799,6 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   justify-content: start;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
   gap: 9px;
   margin-top: 7px;
   font: normal normal medium 12px/16px Quicksand;
@@ -816,11 +813,6 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   justify-content: center;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
-}
-
-.card_image_container {
-  left: 0;
 }
 
 .grayscale {
@@ -830,6 +822,7 @@ body:has(.alerts_main_container:hover) .header_alerts div {
 .course_contents {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 7px;
   font-weight: 500;
   font-size: 12px;
@@ -847,7 +840,6 @@ body:has(.alerts_main_container:hover) .header_alerts div {
   justify-content: space-between;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
 }
 
 select {
@@ -865,7 +857,6 @@ select {
   justify-content: start;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
   gap: 8px;
   font-weight: 500;
   font-size: 12px;
@@ -875,14 +866,10 @@ select {
 
 .card_icons {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
-  margin-left: 24px;
-  margin-right: 24px;
-  gap: 101px;
-  width: 428px;
+  width: 100%;
   height: 40px;
   border-top: 1px solid rgba(0, 0, 0, 0.12);
 }
@@ -902,7 +889,8 @@ select {
   font-size: 16px;
   color: #222222;
   max-height: 43px;
-  max-width: 250px;
+  min-width: 150px;
+  width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
@@ -937,10 +925,10 @@ select {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  flex-wrap: nowrap;
   position: relative;
   bottom: 0;
   width: 100vw;
+  margin-top: auto;
 }
 
 .footer_head {
@@ -950,7 +938,6 @@ select {
   justify-content: center;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
   gap: 9px;
 }
 
@@ -976,7 +963,6 @@ select {
   justify-content: center;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
   background-color: #E0E1E1;
   width: 100vw;
   height: 50px;
@@ -997,7 +983,6 @@ select {
   justify-content: center;
   align-items: center;
   flex-direction: row;
-  flex-wrap: nowrap;
   gap: 20px;
   font: normal normal medium 12px/16px;
 }
@@ -1017,252 +1002,5 @@ select {
   }
   .alerts_main_container {
     right: 164px;
-  }
-}
-@media screen and (min-width: 1024px) and (min-height: 801px) {
-  .dashboard {
-    height: 88vh;
-  }
-}
-@media screen and (min-width: 1025px) and (min-height: 1360px) {
-  .dashboard {
-    height: 98vh;
-  }
-}
-@media screen and (max-width: 1024px) and (min-height: 1360px) {
-  .card_1 {
-    width: 571px;
-  }
-  .card_details {
-    width: 375px;
-  }
-  .card_icons {
-    width: 523px;
-    gap: 132px;
-  }
-  .card_title {
-    max-width: 347px;
-  }
-  .dashboard {
-    height: 98vh;
-  }
-}
-@media screen and (max-width: 1023px) {
-  .card_1 {
-    width: 571px;
-  }
-  .card_details {
-    width: 375px;
-  }
-  .card_icons {
-    width: 523px;
-    gap: 132px;
-  }
-  .card_title {
-    max-width: 347px;
-  }
-}
-@media screen and (max-width: 600px) {
-  .container {
-    padding: 0;
-    width: 100vw;
-  }
-  .header {
-    flex-direction: row;
-    background-size: cover;
-  }
-  .header_icon {
-    position: static;
-    margin: 8px 0;
-    text-align: center;
-  }
-  .header_contents {
-    flex-direction: row;
-    gap: 15px;
-    margin-right: 12px;
-    font-size: 12px;
-    padding: 0 4px;
-    justify-content: flex-end;
-  }
-  .header_dashboard,
-  .header_contents_content,
-  .header_users,
-  .header_reports,
-  .header_admin {
-    font-size: 12px;
-    padding: 0 4px;
-  }
-  .header_alerts,
-  .header_announcements,
-  .header_profile {
-    padding: 8px 4px;
-    height: 100%;
-  }
-  .alerts_text {
-    top: 22px;
-    right: 1px;
-  }
-  .announcements_text {
-    top: 22px;
-    right: -5px;
-  }
-  .profile_text {
-    top: 22px;
-    right: 2px;
-  }
-  .alerts_main_container,
-  .announcements_main_container {
-    top: 60px;
-    right: 4px;
-    box-sizing: border-box;
-  }
-  .alerts_content_container,
-  .announcements_content_container {
-    width: 100%;
-    padding: 0;
-  }
-  .card_container {
-    flex-direction: column;
-    gap: 16px;
-    width: 100%;
-    align-items: center;
-    margin-top: 8px;
-    padding: 0;
-  }
-  .card_1 {
-    width: 90%;
-    /* min-width: 0; */
-    height: auto;
-    margin: 0 auto;
-  }
-  .main_card_content {
-    margin: 12px 12px 0 12px;
-    height: 300px;
-    align-items: flex-start;
-    flex-direction: column;
-    width: 90%;
-  }
-  .card_head img {
-    position: absolute;
-    top: 12px;
-    right: 24px;
-  }
-  .card_image_container {
-    margin: 0 auto;
-    width: 50%;
-    text-align: center;
-  }
-  .card_details {
-    width: 100%;
-    margin: 0 6px;
-  }
-  .card_icons {
-    width: 100%;
-    gap: 110px;
-    margin: 0 auto 8px auto;
-  }
-  .class_selection_box {
-    margin-top: 10px;
-  }
-  .footer {
-    width: 100vw;
-    font-size: 10px;
-  }
-  .footer_contents {
-    flex-direction: column;
-    gap: 4px;
-    height: auto;
-    padding: 8px 0;
-  }
-  .footer_content_right {
-    gap: 8px;
-    font-size: 10px;
-  }
-  .footer_head {
-    flex-direction: column;
-    gap: 2px;
-    margin-top: 12px;
-    margin-bottom: 2px;
-  }
-  .footer_head_left,
-  .footer_head_right {
-    font-size: 12px;
-  }
-  .footer_head_mid,
-  .footer_content_mid {
-    display: none;
-  }
-  .mobile_menu {
-    right: 0;
-    min-width: 0;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  }
-  .announcements_bottom_menu,
-  .alerts_bottom_menu {
-    font-size: 12px;
-    justify-content: space-evenly;
-  }
-  .annoucements_show_all,
-  .announcements_create_new {
-    margin-left: 8px;
-  }
-  .announcements_div_line {
-    margin-left: 8px;
-    height: 20px;
-  }
-  .card_title {
-    max-width: 90vw;
-    font-size: 14px;
-  }
-  .card_subject_grade,
-  .course_contents,
-  .course_capacity {
-    font-size: 11px;
-  }
-  .numbers {
-    font-size: 11px;
-  }
-  .expired_container {
-    font-size: 9px;
-    padding: 2px 4px;
-  }
-}
-@media screen and (max-width: 525px) and (min-width: 451px) {
-  .card_icons {
-    gap: 90px;
-  }
-}
-@media screen and (max-width: 450px) {
-  .filter_container {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-    margin-top: 24px;
-    height: 60px;
-    width: 100%;
-  }
-  .filter_box {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    flex-direction: column;
-    flex-wrap: nowrap;
-    /* height: 28px; */
-    gap: 8px;
-    margin-bottom: 17px;
-  }
-  .card_icons {
-    gap: 70px;
-  }
-}
-@media screen and (max-width: 390px) {
-  .card_icons {
-    gap: 60px;
-  }
-}
-@media screen and (max-width: 350px) {
-  .card_icons {
-    gap: 50px;
-  }
-  .header_alerts, .header_announcements, .header_profile {
-    display: none;
   }
 }/*# sourceMappingURL=dashboard.css.map */

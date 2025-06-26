@@ -1,6 +1,7 @@
 $color_1: #222222;
 $color_2: #666666;
 $color_3: #1F7A54;
+$color_4: #616161;
 $font-family_1: quicksand;
 $background-color_1: #EEEEEE;
 $background-color_2: black;
@@ -276,6 +277,8 @@ button {
 	height: 50px;
 	margin-top: 6px;
 	gap: 20px;
+	@include font-style(12px,500 );
+	color: $color_4;
 }
 .footer_content_mid {
 	height: 24px;
@@ -285,7 +288,6 @@ button {
 
     @include flex-box(center, center);
 	gap: 20px;
-	font: normal normal medium 12px/16px;
 }
 
 
