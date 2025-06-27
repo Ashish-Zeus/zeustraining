@@ -1003,4 +1003,23 @@ select {
   .alerts_main_container {
     right: 164px;
   }
+}
+@media screen and (max-width: 490px) {
+  .alerts_main_container {
+    right: 64px;
+  }
+  .announcements_main_container {
+    right: 36px;
+  }
+}
+@media screen and (max-width: 399px) {
+  .alerts_main_container, .announcements_main_container, .header_alerts, .header_announcements, .header_profile {
+    display: none;
+  }
+  .total_classes, .total_courses {
+    font-size: 18px;
+  }
+  .courses_bar img, .classes_bar img {
+    height: 24px;
+  }
 }/*# sourceMappingURL=dashboard.css.map */
