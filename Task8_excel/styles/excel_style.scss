@@ -1,0 +1,22 @@
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;          // page itself never scrolls
+}
+
+#excel-wrapper {
+  position: fixed;
+  inset: 0;                  // full‑screen
+  overflow: auto;            // native scrollbars ✨
+  /* Optional styling */
+  scrollbar-gutter: stable;  // keeps layout from shifting when bars appear
+}
+
+/* Let the canvas sit absolutely on top of the wrapper content */
+#excel-wrapper > canvas {
+  /* OLD: position:absolute; top:0; left:0; … */
+  position: fixed;   /* pin it to the viewport */
+  inset: 0;
+  display: block;
+  pointer-events: none;   // wheel/drag still go to the wrapper
+}

@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "es2020",                 // modern JS
+    "module": "es2020",                 // use ESM for browser compatibility
+    "moduleResolution": "bundler",
+    "outDir": "./dist",                 // compiled output directory
+    "rootDir": "./controllers",          // where your .ts files are
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["controllers/*.ts"]
+}

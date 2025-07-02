@@ -1,0 +1,23 @@
+@charset "UTF-8";
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+#excel-wrapper {
+  position: fixed;
+  inset: 0;
+  overflow: auto;
+  /* Optional styling */
+  scrollbar-gutter: stable;
+}
+
+/* Let the canvas sit absolutely on top of the wrapper content */
+#excel-wrapper > canvas {
+  /* OLD: position:absolute; top:0; left:0; … */
+  position: fixed; /* pin it to the viewport */
+  inset: 0;
+  display: block;
+  pointer-events: none;
+}/*# sourceMappingURL=excel_style.css.map */
