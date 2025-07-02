@@ -83,7 +83,6 @@ window.addEventListener('resize', () => {
     const maxLeft = parentRect.width - childDIvElement.offsetWidth;
     const maxTop = parentRect.height - childDIvElement.offsetHeight;
 
-    // Clamp the position
     left = Math.min(left, maxLeft);
     top = Math.min(top, maxTop);
 
