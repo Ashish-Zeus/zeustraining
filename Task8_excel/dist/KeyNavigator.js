@@ -3,6 +3,14 @@
  */
 import { CellSelection, RangeSelection, } from "./Selection.js";
 export class KeyNavigator {
+    /**
+     *
+     * @param cfg
+     * @param sel
+     * @param wrapper
+     * @param isEditing
+     * @param requestRender
+     */
     constructor(cfg, sel, wrapper, isEditing, requestRender) {
         this.cfg = cfg;
         this.sel = sel;
@@ -11,6 +19,11 @@ export class KeyNavigator {
         this.requestRender = requestRender;
         this.anchor = null;
         /* ── key handler ──────────────────────────────────────────────────── */
+        /**
+         *
+         * @param e
+         * @returns
+         */
         this.onKey = (e) => {
             if (this.isEditing())
                 return;
@@ -29,6 +42,13 @@ export class KeyNavigator {
         window.addEventListener("keydown", this.onKey, { passive: false });
     }
     /* ── move or extend ──────────────────────────────────────────────── */
+    /**
+     *
+     * @param dr
+     * @param dc
+     * @param extend
+     * @returns
+     */
     move(dr, dc, extend) {
         const focus = this.sel.getActiveCell();
         if (!focus)
@@ -48,6 +68,11 @@ export class KeyNavigator {
         this.requestRender();
     }
     /* ── helpers ─────────────────────────────────────────────────────── */
+    /**
+     *
+     * @param key
+     * @returns
+     */
     delta(key) {
         return key === "ArrowUp" ? { dr: -1, dc: 0 } :
             key === "ArrowDown" ? { dr: 1, dc: 0 } :
@@ -55,6 +80,11 @@ export class KeyNavigator {
                     key === "ArrowRight" ? { dr: 0, dc: 1 } :
                         { dr: 0, dc: 0 };
     }
+    /**
+     *
+     * @param r
+     * @param c
+     */
     scrollIntoView(r, c) {
         const offX = this.cfg.headerWidth;
         const offY = this.cfg.headerHeight;
@@ -78,6 +108,13 @@ export class KeyNavigator {
             this.wrapper.scrollTo({ left: newL, top: newT, behavior: "auto" });
         }
     }
+    /**
+     *
+     * @param v
+     * @param min
+     * @param max
+     * @returns
+     */
     clamp(v, min, max) {
         return Math.max(min, Math.min(max, v));
     }

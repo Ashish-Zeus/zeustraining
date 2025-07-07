@@ -15,37 +15,87 @@ export interface Rect {
 /* ───────────────────  Concrete selection types  ──────────────────────── */
 
 export class CellSelection {
-  constructor(public row: number, public col: number) {}
+  /**
+   * 
+   * @param row 
+   * @param col 
+   */
+  constructor(public row: number, public col: number) { }
 }
 
 /**Entire column (all rows) */
 export class ColumnSelection {
-  constructor(public col: number) {}
+  /**
+   * 
+   * @param col 
+   */
+  constructor(public col: number) { }
 }
 
 /**Entire row (all cols) */
 export class RowSelection {
-  constructor(public row: number) {}
+  /**
+   * 
+   * @param row 
+   */
+  constructor(public row: number) { }
 }
 
 /**Rectangular range */
 export class RangeSelection implements Rect {
+  /**
+   * 
+   * @param r0 
+   * @param c0 
+   * @param r1 
+   * @param c1 
+   */
   constructor(
     public r0: number,
     public c0: number,
     public r1: number,
-    public c1: number
-  ) {}
+    public c1: number,
+  ) {
+    /**row/col where the selection started (for white background)*/
+    this.anchorRow = r0;
+    this.anchorCol = c0;
+  }
+
+  /** The fixed cell where selection started */
+  public anchorRow: number;
+  public anchorCol: number;
   isSingle(): boolean {
     return this.r0 === this.r1 && this.c0 === this.c1;
   }
+  /**
+   * 
+   * @param row 
+   * @param col 
+   */
+  /**grow the rectangle but KEEP the anchor fixed*/
   extendTo(row: number, col: number): void {
-    this.r0 = Math.min(this.r0, row);
-    this.c0 = Math.min(this.c0, col);
-    this.r1 = Math.max(this.r1, row);
-    this.c1 = Math.max(this.c1, col);
+    this.r0 = Math.min(this.anchorRow, row);
+    this.r1 = Math.max(this.anchorRow, row);
+    this.c0 = Math.min(this.anchorCol, col);
+    this.c1 = Math.max(this.anchorCol, col);
   }
 
+}
+
+/**Full set of contiguous columns (c0‒c1), all rows */
+export class ColumnRangeSelection {
+  constructor(
+    public c0: number,
+    public c1: number
+  ) {}
+}
+
+/**Full set of contiguous rows (r0‒r1), all columns */
+export class RowRangeSelection {
+  constructor(
+    public r0: number,
+    public r1: number
+  ) {}
 }
 
 /* ───────────────────  Selection manager (facade)  ────────────────────── */
@@ -55,12 +105,18 @@ export type AnySelection =
   | ColumnSelection
   | RowSelection
   | RangeSelection
+  | ColumnRangeSelection
+  | RowRangeSelection
   | null;
 
 export class SelectionManager {
   private current: AnySelection = null;
 
   /**replace current selection */
+  /**
+   * 
+   * @param sel 
+   */
   set(sel: AnySelection): void {
     this.current = sel;
   }

@@ -11,6 +11,14 @@ import type { GridConfig } from "./Grid";
 export class KeyNavigator {
   private anchor: { row: number; col: number } | null = null;
 
+  /**
+   * 
+   * @param cfg 
+   * @param sel 
+   * @param wrapper 
+   * @param isEditing 
+   * @param requestRender 
+   */
   constructor(
     private readonly cfg: GridConfig,
     private readonly sel: SelectionManager,
@@ -22,10 +30,15 @@ export class KeyNavigator {
   }
 
   /* ── key handler ──────────────────────────────────────────────────── */
+  /**
+   * 
+   * @param e 
+   * @returns 
+   */
   private onKey = (e: KeyboardEvent): void => {
     if (this.isEditing()) return;
 
-    /* plain Tab ⇦ / ⇨ (no Shift = right, Shift = left) */
+    /* plain Tab  /  (no Shift = right, Shift = left) */
     if (e.key === "Tab") {
       this.move(0, e.shiftKey ? -1 : 1, e.shiftKey);
       e.preventDefault();
@@ -40,6 +53,13 @@ export class KeyNavigator {
   };
 
   /* ── move or extend ──────────────────────────────────────────────── */
+  /**
+   * 
+   * @param dr 
+   * @param dc 
+   * @param extend 
+   * @returns 
+   */
   private move(dr: number, dc: number, extend: boolean): void {
     const focus = this.sel.getActiveCell();
     if (!focus) return;
@@ -67,6 +87,11 @@ export class KeyNavigator {
   }
 
   /* ── helpers ─────────────────────────────────────────────────────── */
+  /**
+   * 
+   * @param key 
+   * @returns 
+   */
   private delta(key: string): { dr: number; dc: number } {
     return key === "ArrowUp"    ? { dr: -1, dc:  0 } :
            key === "ArrowDown"  ? { dr:  1, dc:  0 } :
@@ -75,6 +100,11 @@ export class KeyNavigator {
            { dr: 0, dc: 0 };
   }
 
+  /**
+   * 
+   * @param r 
+   * @param c 
+   */
   private scrollIntoView(r: number, c: number): void {
     const offX = this.cfg.headerWidth;
     const offY = this.cfg.headerHeight;
@@ -103,6 +133,13 @@ export class KeyNavigator {
     }
   }
 
+  /**
+   * 
+   * @param v 
+   * @param min 
+   * @param max 
+   * @returns 
+   */
   private clamp(v: number, min: number, max: number): number {
     return Math.max(min, Math.min(max, v));
   }

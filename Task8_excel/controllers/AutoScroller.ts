@@ -25,6 +25,11 @@ export class AutoScroller {
     }
 
     /**Return px/frame scroll speed based on pointer proximity to *inner* edges.*/
+    /**
+     * 
+     * @param p 
+     * @returns 
+     */
     private edgeSpeed(p: { x: number; y: number }): { dx: number; dy: number } {
         const r = this.wrapper.getBoundingClientRect();
         const zone = 80;              // px inside each edge
