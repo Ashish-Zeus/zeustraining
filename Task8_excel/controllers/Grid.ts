@@ -14,9 +14,9 @@ import {
   RowSelection,
   RangeSelection,
   ColumnRangeSelection,
-  RowRangeSelection
+  RowRangeSelection,
 } from "./Selection";
-
+import { RowHeights, ColWidths } from "./types";
 export interface GridConfig {
   rows: number;
   cols: number;
@@ -37,7 +37,7 @@ export class Grid {
   public readonly canvas: HTMLCanvasElement;
 
   private readonly ctx: CanvasRenderingContext2D;
-  private readonly dpr = window.devicePixelRatio || 1;
+  private dpr = window.devicePixelRatio || 1;
 
   private readonly scroller: HTMLDivElement;
   private readonly spacer: HTMLDivElement;
@@ -55,16 +55,17 @@ export class Grid {
   /**anchor for drag‑selection */
   private dragAnchor: { row: number; col: number } | null = null;
 
-  private navigator!: KeyNavigator
-  private auto!: AutoScroller;                            // field
-  private pointer = { x: 0, y: 0 };                       // tracks mouse pos
+  private navigator!: KeyNavigator;
+  private auto!: AutoScroller; // field
+  private pointer = { x: 0, y: 0 }; // tracks mouse pos
 
   private dragHeaderMode: "column" | "row" | null = null;
-  private headerAnchor: number | null = null;   // col index or row index
-
+  private headerAnchor: number | null = null; // col index or row index
+  private readonly colW: ColWidths;
+  private readonly rowH: RowHeights;
   /**
-   * 
-   * @param cfg 
+   *
+   * @param cfg
    */
   constructor(private readonly cfg: GridConfig) {
     const wrap = document.getElementById("excel-wrapper") as HTMLDivElement;
@@ -92,50 +93,72 @@ export class Grid {
     this.scroller.addEventListener("mousemove", this.onMouseMove);
     this.scroller.addEventListener("dblclick", this.onDoubleClick);
 
+    /* typing starts overwrite‑edit */
+    window.addEventListener("keydown", this.onTypeStart, { passive: false });
     /*   Arrow‑key navigation */
     this.navigator = new KeyNavigator(
       this.cfg,
       this.sel,
       this.scroller,
-      () => this.editing,          // tell navigator when editing is active
-      () => this.render()          // let it trigger a repaint
+      () => this.editing, // tell navigator when editing is active
+      () => this.render() // let it trigger a repaint
     );
 
-    this.auto = new AutoScroller(
-      this.scroller,
-      () => this.pointer
-    );
+    this.auto = new AutoScroller(this.scroller, () => this.pointer);
 
     window.addEventListener("mouseup", this.onMouseUp);
     /* global move keeps pointer + selection live even off‑wrapper */
     window.addEventListener("mousemove", this.onGlobalMove);
 
-
-    new ResizeObserver(ent => {
+    new ResizeObserver((ent) => {
       const { width, height } = ent[0].contentRect;
       this.resize(width, height);
     }).observe(wrap);
 
-    this.rend = new Renderer(this.ctx, this.cfg, this.data);
+    this.rowH = Array(this.cfg.rows).fill(this.cfg.defaultRowHeight); // initialize with default row heights
+    this.colW = Array(this.cfg.cols).fill(this.cfg.defaultColWidth); // initialize with default col widths
+    this.rend = new Renderer(
+      this.ctx,
+      this.cfg,
+      this.data,
+      this.colW,
+      this.rowH
+    );
   }
 
   /* ───────────────────────────────  Resizing  ────────────────────────── */
   /**
-   * 
-   * @param w 
-   * @param h 
+   *
+   * @param w
+   * @param h
    */
   public resize(w: number, h: number): void {
+    /* 1. Detect DPR — this changes when you zoom the page */
+    const newDpr = window.devicePixelRatio || 1;
+    if (newDpr !== this.dpr) {
+      this.dpr = newDpr;
+      /* reset all transforms then scale to new DPR */
+      this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    }
+
+    /* 2. Give the canvas enough backing pixels for the new DPR */
     this.canvas.width = Math.floor(w * this.dpr);
     this.canvas.height = Math.floor(h * this.dpr);
 
+    /* 3. DO NOT touch canvas.style.width/height — let CSS keep it 100 % */
+    /*    (explicit pixel sizes caused the “canvas got smaller” problem)  */
+
+    /* 4. Logical viewport size */
     this.viewport.width = w;
     this.viewport.height = h;
 
-    this.spacer.style.width =
-      `${this.cfg.headerWidth + this.cfg.cols * this.cfg.defaultColWidth}px`;
-    this.spacer.style.height =
-      `${this.cfg.headerHeight + this.cfg.rows * this.cfg.defaultRowHeight}px`;
+    /* 5. Scrollable spacer stays the same logic */
+    this.spacer.style.width = `${
+      this.cfg.headerWidth + this.cfg.cols * this.cfg.defaultColWidth
+    }px`;
+    this.spacer.style.height = `${
+      this.cfg.headerHeight + this.cfg.rows * this.cfg.defaultRowHeight
+    }px`;
 
     this.render();
   }
@@ -143,18 +166,37 @@ export class Grid {
   /* ─────────────────────────────  Rendering  ─────────────────────────── */
 
   private render(): void {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    // this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    // this.rend.draw(this.viewport, this.sel.get());
+    /* Always draw at correct device‑pixel ratio */
+    this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+
+    /* Clear entire Hi‑DPI backing store */
+    this.ctx.clearRect(
+      0,
+      0,
+      this.canvas.width / this.dpr,
+      this.canvas.height / this.dpr
+    );
+
     this.rend.draw(this.viewport, this.sel.get());
   }
 
   /* ─────────────────────────  Mouse interaction  ─────────────────────── */
   /**
-   * 
-   * @param e 
-   * @returns 
+   *
+   * @param e
+   * @returns
    */
   private onMouseDown = (e: MouseEvent): void => {
-    if (this.editing) return;
+    /* ── Abort if the click is on a scrollbar ─────────────────────────── */
+    const rect = this.scroller.getBoundingClientRect();
+
+    const onVScroll = e.clientX > rect.left + this.scroller.clientWidth;
+    const onHScroll = e.clientY > rect.top + this.scroller.clientHeight;
+    if (onVScroll || onHScroll) return; // ←  nothing else, just ignore
+    /* ------------------------------------------------------------------- */
+    // if (this.editing) return;
     this.updatePointer(e);
     if (this.editor) {
       if (e.target === this.editor) {
@@ -172,73 +214,44 @@ export class Grid {
       this.commitEdit();
       this.dragHeaderMode = "row";
       this.headerAnchor = row;
-      this.sel.set(new RowRangeSelection(row, row));
+      this.sel.set(new RowRangeSelection(row, row, row));
       this.render();
       return;
     }
+
     /* column header click */
     if (region === "colHeader" && col !== null) {
       this.commitEdit();
       this.dragHeaderMode = "column";
       this.headerAnchor = col;
-      this.sel.set(new ColumnRangeSelection(col, col));
+      this.sel.set(new ColumnRangeSelection(col, col, col));
       this.render();
       return;
     }
+    
     /* sheet body click */
     if (region === "body" && row !== null && col !== null) {
       // const active = this.sel.getActiveCell();
-      this.commitEdit();                      // close any editor
-      this.sel.set(new CellSelection(row, col));   //  select the cell
-      this.dragAnchor = { row, col };         // start possible drag
-      this.render();                          // paint blue outline
-      // if (active && active.row === row && active.col === col) {
-      //   /* second click -> edit */
-      //   this.openEditor(row, col);
-      // } else {
-      //   this.commitEdit();
-      //   this.sel.set(new CellSelection(row, col));
-      //   this.dragAnchor = { row, col };     // start possible drag
-      //   this.render();
-      // }
+      this.commitEdit(); // close any editor
+      this.sel.set(new CellSelection(row, col)); //  select the cell
+      this.dragAnchor = { row, col }; // start possible drag
+      this.render(); // paint blue outline
     }
-    if (this.dragAnchor) {                    // start of a drag
+    if (this.dragAnchor) {
+      // start of a drag
       window.addEventListener("mousemove", this.onGlobalMove);
     }
   };
 
   /**
-   * 
-   * @param e 
-   * @returns 
+   *
+   * @param e
+   * @returns
    */
-  // private onMouseMove = (e: MouseEvent): void => {
-  //   if (this.editing || !this.dragAnchor) return;
 
-  //   this.updatePointer(e);           // keep pointer fresh
-  //   this.auto.start();                   // auto‑scroll
-
-  //   /* convert pointer → sheet row/col */
-  //   const { row, col } = this.bodyCoordsFromEvent(e);
-
-  //   /* NEW  —— create OR update the RangeSelection —— */
-  //   let range = this.sel.get();
-  //   if (!(range instanceof RangeSelection)) {
-  //     range = new RangeSelection(
-  //       this.dragAnchor.row,
-  //       this.dragAnchor.col,
-  //       this.dragAnchor.row,
-  //       this.dragAnchor.col
-  //     );
-  //   }
-  //   range.extendTo(row, col);            // keeps anchor fixed
-  //   this.sel.set(range);
-
-  //   this.render();
-  // };
   /* ─────────────────────────  Mouse‑move  ───────────────────────────── */
   private onMouseMove = (e: MouseEvent): void => {
-    if (this.editing) return;                 // ignore while editing
+    if (this.editing) return; // ignore while editing
 
     /* Always keep global pointer fresh (needed for AutoScroller) */
     this.updatePointer(e);
@@ -249,13 +262,23 @@ export class Grid {
     if (this.dragHeaderMode === "column" && this.headerAnchor !== null) {
       const { col } = this.hitTest(e);
       if (col !== null) {
-        const c0 = Math.min(this.headerAnchor, col);
-        const c1 = Math.max(this.headerAnchor, col);
-        this.sel.set(new ColumnRangeSelection(c0, c1));
+        const cur = this.sel.get();
+        if (cur instanceof ColumnRangeSelection) {
+          cur.extendTo(col); // keep anchorCol fixed
+          this.sel.set(cur);
+        } else {
+          this.sel.set(
+            new ColumnRangeSelection(
+              Math.min(this.headerAnchor!, col),
+              Math.max(this.headerAnchor!, col),
+              this.headerAnchor! // ← anchor
+            )
+          );
+        }
         this.auto.start();
         this.render();
       }
-      return;                                   // done for this event
+      return; // done for this event
     }
 
     /* ======================================================== */
@@ -264,13 +287,23 @@ export class Grid {
     if (this.dragHeaderMode === "row" && this.headerAnchor !== null) {
       const { row } = this.hitTest(e);
       if (row !== null) {
-        const r0 = Math.min(this.headerAnchor, row);
-        const r1 = Math.max(this.headerAnchor, row);
-        this.sel.set(new RowRangeSelection(r0, r1));
+        const cur = this.sel.get();
+        if (cur instanceof RowRangeSelection) {
+          cur.extendTo(row);
+          this.sel.set(cur);
+        } else {
+          this.sel.set(
+            new RowRangeSelection(
+              Math.min(this.headerAnchor!, row),
+              Math.max(this.headerAnchor!, row),
+              this.headerAnchor!
+            )
+          );
+        }
         this.auto.start();
         this.render();
       }
-      return;                                   // done for this event
+      return; // done for this event
     }
 
     /* ======================================================== */
@@ -278,7 +311,7 @@ export class Grid {
     /* ======================================================== */
     if (!this.dragAnchor) return;
 
-    this.auto.start();   // keep auto‑scroll running
+    this.auto.start(); // keep auto‑scroll running
 
     /* Convert pointer to current row / col */
     const { row, col } = this.bodyCoordsFromEvent(e);
@@ -288,9 +321,9 @@ export class Grid {
 
     const curSel = this.sel.get();
     if (curSel instanceof RangeSelection) {
-      range = curSel;                                    // reuse existing
+      range = curSel; // reuse existing
     } else {
-      range = new RangeSelection(                        // start new range
+      range = new RangeSelection( // start new range
         this.dragAnchor.row,
         this.dragAnchor.col,
         this.dragAnchor.row,
@@ -298,13 +331,11 @@ export class Grid {
       );
     }
 
-    range.extendTo(row, col);     // now compiler knows range is RangeSelection
+    range.extendTo(row, col); // now compiler knows range is RangeSelection
     this.sel.set(range);
 
     this.render();
   };
-
-
 
   private onMouseUp = (): void => {
     if (this.editing) return;
@@ -316,24 +347,23 @@ export class Grid {
   };
 
   /**
-   * 
-   * @param e 
-   * @returns 
+   *
+   * @param e
+   * @returns
    */
   private onDoubleClick = (e: MouseEvent): void => {
-    if (this.editing) return;                       // already editing? ignore
+    if (this.editing) return; // already editing? ignore
     const { row, col, region } = this.hitTest(e);
     if (region === "body" && row !== null && col !== null) {
-      this.openEditor(row, col);                    // ✨ start editing
+      this.openEditor(row, col); // ✨ start editing
     }
   };
 
-
   /**Select a single cell and scroll it fully into view */
   /**
-   * 
-   * @param row 
-   * @param col 
+   *
+   * @param row
+   * @param col
    */
   private selectCellAndReveal(row: number, col: number): void {
     this.sel.set(new CellSelection(row, col));
@@ -365,8 +395,8 @@ export class Grid {
 
   /**Pointer updates *inside* the wrapper only*/
   /**
-   * 
-   * @param e 
+   *
+   * @param e
    */
   private updatePointer(e: MouseEvent): void {
     this.pointer.x = e.clientX;
@@ -374,46 +404,14 @@ export class Grid {
   }
 
   /**
-   * 
-   * @param e 
-   * @returns 
+   *
+   * @param e
+   * @returns
    */
-  // private onGlobalMove = (e: MouseEvent): void => {
-  //   if (!this.dragAnchor) return;          // only during drag‑selection
-  //   this.updatePointer(e);
 
-  //   /* --- recompute row/col from *global* pointer --- */
-  //   const rect = this.scroller.getBoundingClientRect();
-  //   const localX = e.clientX - rect.left;
-  //   const localY = e.clientY - rect.top;
-
-  //   const col = Math.floor(
-  //     (localX + this.viewport.scrollX - this.cfg.headerWidth) /
-  //     this.cfg.defaultColWidth
-  //   );
-  //   const row = Math.floor(
-  //     (localY + this.viewport.scrollY - this.cfg.headerHeight) /
-  //     this.cfg.defaultRowHeight
-  //   );
-
-  //   /* clamp to sheet edges */
-  //   const r = this.clamp(row, 0, this.cfg.rows - 1);
-  //   const c = this.clamp(col, 0, this.cfg.cols - 1);
-
-  //   /* Update selection shape */
-  //   this.sel.set(
-  //     new RangeSelection(
-  //       Math.min(this.dragAnchor.row, r),
-  //       Math.min(this.dragAnchor.col, c),
-  //       Math.max(this.dragAnchor.row, r),
-  //       Math.max(this.dragAnchor.col, c)
-  //     )
-  //   );
-  //   this.render();
-  // };
   /* ─────────────────────────  Global mouse‑move (drag)  ─────────────────── */
   private onGlobalMove = (e: MouseEvent): void => {
-    if (this.editing) return;              // ignore while editing
+    if (this.editing) return; // ignore while editing
 
     /* Always update pointer */
     this.pointer.x = e.clientX;
@@ -423,9 +421,19 @@ export class Grid {
     if (this.dragHeaderMode === "column" && this.headerAnchor !== null) {
       const { col } = this.hitTest(e);
       if (col !== null) {
-        const c0 = Math.min(this.headerAnchor, col);
-        const c1 = Math.max(this.headerAnchor, col);
-        this.sel.set(new ColumnRangeSelection(c0, c1));
+        const cur = this.sel.get();
+        if (cur instanceof ColumnRangeSelection) {
+          cur.extendTo(col); // keep anchor fixed
+          this.sel.set(cur);
+        } else {
+          this.sel.set(
+            new ColumnRangeSelection(
+              Math.min(this.headerAnchor, col),
+              Math.max(this.headerAnchor, col),
+              this.headerAnchor // anchor stays constant
+            )
+          );
+        }
         this.auto.start();
         this.render();
       }
@@ -436,9 +444,19 @@ export class Grid {
     if (this.dragHeaderMode === "row" && this.headerAnchor !== null) {
       const { row } = this.hitTest(e);
       if (row !== null) {
-        const r0 = Math.min(this.headerAnchor, row);
-        const r1 = Math.max(this.headerAnchor, row);
-        this.sel.set(new RowRangeSelection(r0, r1));
+        const cur = this.sel.get();
+        if (cur instanceof RowRangeSelection) {
+          cur.extendTo(row);
+          this.sel.set(cur);
+        } else {
+          this.sel.set(
+            new RowRangeSelection(
+              Math.min(this.headerAnchor, row),
+              Math.max(this.headerAnchor, row),
+              this.headerAnchor
+            )
+          );
+        }
         this.auto.start();
         this.render();
       }
@@ -446,9 +464,9 @@ export class Grid {
     }
 
     /* ==================== BODY drag (RangeSelection) ============ */
-    if (!this.dragAnchor) return;          // not dragging in body
+    if (!this.dragAnchor) return; // not dragging in body
 
-    this.auto.start();                     // ensure auto‑scroll keeps running
+    this.auto.start(); // ensure auto‑scroll keeps running
 
     const { row, col } = this.bodyCoordsFromEvent(e);
 
@@ -472,14 +490,12 @@ export class Grid {
     this.render();
   };
 
-
-
   /**
-   * 
-   * @param v 
-   * @param min 
-   * @param max 
-   * @returns 
+   *
+   * @param v
+   * @param min
+   * @param max
+   * @returns
    */
   private clamp(v: number, min: number, max: number): number {
     return Math.max(min, Math.min(max, v));
@@ -492,28 +508,26 @@ export class Grid {
 
     const col = Math.floor(
       (localX + this.viewport.scrollX - this.cfg.headerWidth) /
-      this.cfg.defaultColWidth
+        this.cfg.defaultColWidth
     );
     const row = Math.floor(
       (localY + this.viewport.scrollY - this.cfg.headerHeight) /
-      this.cfg.defaultRowHeight
+        this.cfg.defaultRowHeight
     );
 
     /* clamp to sheet edges */
     return {
       row: this.clamp(row, 0, this.cfg.rows - 1),
-      col: this.clamp(col, 0, this.cfg.cols - 1)
+      col: this.clamp(col, 0, this.cfg.cols - 1),
     };
   }
-
-
 
   /* ─────────────────────────────  Hit‑testing  ───────────────────────── */
 
   /**
-   * 
-   * @param e 
-   * @returns 
+   *
+   * @param e
+   * @returns
    */
   private hitTest(e: MouseEvent): {
     row: number | null;
@@ -530,105 +544,127 @@ export class Grid {
     if (x < this.cfg.headerWidth) {
       const row = Math.floor(
         (y + this.viewport.scrollY - this.cfg.headerHeight) /
-        this.cfg.defaultRowHeight
+          this.cfg.defaultRowHeight
       );
       return { row, col: null, region: "rowHeader" };
     }
     if (y < this.cfg.headerHeight) {
       const col = Math.floor(
         (x + this.viewport.scrollX - this.cfg.headerWidth) /
-        this.cfg.defaultColWidth
+          this.cfg.defaultColWidth
       );
       return { row: null, col, region: "colHeader" };
     }
     const col = Math.floor(
       (x + this.viewport.scrollX - this.cfg.headerWidth) /
-      this.cfg.defaultColWidth
+        this.cfg.defaultColWidth
     );
     const row = Math.floor(
       (y + this.viewport.scrollY - this.cfg.headerHeight) /
-      this.cfg.defaultRowHeight
+        this.cfg.defaultRowHeight
     );
     return { row, col, region: "body" };
   }
 
   /* ────────────────────────────  Editing  ────────────────────────────── */
+
+  /* ──────────────────────── Typing when not editing ─────────────────────── */
   /**
-   * 
-   * @param row 
-   * @param col 
-   * @returns 
+   *
+   * @param e
+   * @returns
    */
-  private openEditor(row: number, col: number): void {
+  private onTypeStart = (e: KeyboardEvent): void => {
+    /* ignore if already in edit mode */
+    if (this.editing) return;
+
+    /* printable single character only, no Ctrl/Cmd/Alt */
+    if (e.key.length !== 1 || e.ctrlKey || e.metaKey || e.altKey) return;
+
+    const active = this.sel.getActiveCell();
+    if (!active) return;
+
+    /* begin overwrite edit with the typed char (caret hidden) */
+    this.openEditor(active.row, active.col, e.key, /*overwrite=*/ true);
+    e.preventDefault(); // block browser hotkeys (e.g. space scroll)
+  };
+
+  /* ──────────────────────── Editing a cell ─────────────────────── */
+  /**
+   *
+   * @param row
+   * @param col
+   * @returns
+   */
+  /* overwrite = true  → start with initialChar only and hide caret */
+  private openEditor(
+    row: number,
+    col: number,
+    initialChar: string = "",
+    overwrite = false
+  ): void {
+    /* ── If dragging don't open editor ───────────────── */
+
+    if (this.dragAnchor || this.dragHeaderMode) return;
+    /* ───────────────────────────────────────────────────────────── */
     if (this.editor) return;
 
-    const initVal = this.data.get(row, col) ?? "";
+    const initVal = overwrite ? initialChar : this.data.get(row, col) ?? "";
     this.editing = true;
+
     const input = document.createElement("input");
     input.value = initVal;
+    input.className = "cell-editor";
     input.style.position = "absolute";
     input.style.font = "12px system-ui, sans-serif";
-    input.style.padding = "0 2px";
-    input.style.border = "1px solid #1a73e8";
+    // input.style.padding = "0 2px";
+    input.style.border = "2px solid #107c41";
     input.style.outline = "none";
+    input.style.boxSizing = "border-box";
     input.style.background = "#fff";
     input.style.zIndex = "10";
+    /* hide caret for overwrite mode */
+    // input.style.caretColor = overwrite ? "transparent" : "";
 
-
-    input.addEventListener("mousedown", ev => ev.stopPropagation(), true);
-    // input.addEventListener("click", ev => ev.stopPropagation(), true);
+    /* stop clicks bubbling out of the editor */
+    input.addEventListener("mousedown", (ev) => ev.stopPropagation(), true);
 
     /* locate over cell */
-    input.style.left =
-      `${this.cfg.headerWidth +
-      col * this.cfg.defaultColWidth -
-      this.viewport.scrollX}px`;
-    input.style.top =
-      `${this.cfg.headerHeight +
-      row * this.cfg.defaultRowHeight -
-      this.viewport.scrollY}px`;
-    input.style.width = `${this.cfg.defaultColWidth - 1}px`;
-    input.style.height = `${this.cfg.defaultRowHeight - 1}px`;
 
+    input.style.left = `${
+      this.cfg.headerWidth + col * this.cfg.defaultColWidth
+    }px`;
+    input.style.top = `${
+      this.cfg.headerHeight + row * this.cfg.defaultRowHeight
+    }px`;
+    /* width/height stay the same */
+    input.style.width = `${this.cfg.defaultColWidth + 0.5}px`;
+    input.style.height = `${this.cfg.defaultRowHeight + 0.5}px`;
 
     this.scroller.appendChild(input);
     input.focus();
-    input.select();
+
+    if (overwrite) {
+      /* place caret after the seeded char but DON’T select it */
+      const len = input.value.length;
+      input.setSelectionRange(len, len);
+    } else {
+      /* double‑click / F2 edit keeps Excel behaviour (full select) */
+      input.select();
+    }
+
     this.editor = input;
 
-    //   const commit = () => {
-    //     this.data.set(row, col, input.value.trim());
-    //     this.commitEdit();
-    //     this.render();
-    //   };
-
-    //   input.addEventListener("keydown", ev => {
-    //     if (ev.key === "Enter") commit();
-    //     if (ev.key === "Escape") {
-    //       this.commitEdit();
-    //       this.render();
-    //     }
-    //   });
-    //   input.addEventListener("blur", commit);
-    // }
-
-    // private commitEdit(): void {
-    //   if (this.editor) {
-    //     this.editor.remove();
-    //     this.editor = undefined;
-    //   }
-    // }
-
     /**
-     * 
-     * @param save 
+     *
+     * @param save
      */
     const commit = (save: boolean) => {
       if (save) this.data.set(row, col, input.value.trim());
-      this.commitEdit();   // tears down
+      this.commitEdit(); // tears down
     };
 
-    input.addEventListener("keydown", ev => {
+    input.addEventListener("keydown", (ev) => {
       if (ev.key === "Enter") {
         /*  save the value */
         this.data.set(row, col, input.value.trim());
@@ -643,23 +679,42 @@ export class Grid {
         /*  final repaint with the new selection */
         this.render();
 
-        ev.preventDefault();   // stop the newline the browser would insert
-      }
-      else if (ev.key === "Tab") {
+        ev.preventDefault(); // stop the newline the browser would insert
+      } else if (ev.key === "Tab") {
         this.data.set(row, col, input.value.trim());
-        this.commitEdit();                       // closes editor & repaint
+        this.commitEdit(); // closes editor & repaint
         const nextCol = ev.shiftKey
-          ? Math.max(col, 0)                 // Shift+Tab ⇦
-          : Math.min(col, this.cfg.cols - 1);// Tab      ⇒
-        this.selectCellAndReveal(row, nextCol);  // jump ⇦ / ⇒
+          ? Math.max(col, 0) // Shift+Tab ⇦
+          : Math.min(col, this.cfg.cols - 1); // Tab      ⇒
+        this.selectCellAndReveal(row, nextCol); // jump ⇦ / ⇒
         this.render();
-        ev.preventDefault();                     // keep focus on grid
+        ev.preventDefault(); // keep focus on grid
+      } else if (
+        ev.key === "ArrowDown" ||
+        ev.key === "ArrowUp" ||
+        ev.key === "ArrowLeft" ||
+        ev.key === "ArrowRight"
+      ) {
+        /* save current value */
+        this.data.set(row, col, input.value.trim());
+        this.commitEdit(); // closes editor & repaint
+
+        /*  compute next cell */
+        let nextRow = row;
+        let nextCol = col;
+        if (ev.key === "ArrowDown") nextRow = Math.min(row, this.cfg.rows - 1);
+        if (ev.key === "ArrowUp") nextRow = Math.max(row, 0);
+        if (ev.key === "ArrowRight") nextCol = Math.min(col, this.cfg.cols - 1);
+        if (ev.key === "ArrowLeft") nextCol = Math.max(col, 0);
+
+        /*  move blue outline there */
+        this.selectCellAndReveal(nextRow, nextCol);
+        this.render();
+
+        ev.preventDefault(); // stop caret movement in input
+      } else if (ev.key === "Escape") {
+        this.commitEdit(); // cancel edit
       }
-      else if (ev.key === "Escape") {
-        this.commitEdit();     // cancel edit
-      }
-      // if (ev.key === "Tab") { commit(true); ev.preventDefault(); }
-      // if (ev.key === "Escape") { commit(false); }
     });
     input.addEventListener("blur", () => {
       this.data.set(row, col, input.value.trim());
@@ -669,21 +724,15 @@ export class Grid {
   }
 
   private commitEdit(): void {
-    // if (!this.editor) return;
-    // // this.editor.remove();
-    // /* remove only if still in the DOM – avoids NotFoundError */
-    // if (this.editor.isConnected) this.editor.remove();
-    // this.editor = undefined;
-    // this.editing = false;   //  back to normal mode
-    // this.render();
     const el = this.editor;
-    if (!el) return;                     // already handled once
+    if (!el) return; // already handled once
 
     this.editor = undefined;
     this.editing = false;
 
     // Remove from DOM only if still attached — avoids NotFoundError.
     if (el.parentNode) el.parentNode.removeChild(el);
+    if (el) el.style.caretColor = ""; // restore caret for next edit session
 
     this.render();
   }

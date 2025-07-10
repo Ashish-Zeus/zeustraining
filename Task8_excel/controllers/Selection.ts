@@ -16,45 +16,45 @@ export interface Rect {
 
 export class CellSelection {
   /**
-   * 
-   * @param row 
-   * @param col 
+   *
+   * @param row
+   * @param col
    */
-  constructor(public row: number, public col: number) { }
+  constructor(public row: number, public col: number) {}
 }
 
 /**Entire column (all rows) */
 export class ColumnSelection {
   /**
-   * 
-   * @param col 
+   *
+   * @param col
    */
-  constructor(public col: number) { }
+  constructor(public col: number) {}
 }
 
 /**Entire row (all cols) */
 export class RowSelection {
   /**
-   * 
-   * @param row 
+   *
+   * @param row
    */
-  constructor(public row: number) { }
+  constructor(public row: number) {}
 }
 
 /**Rectangular range */
 export class RangeSelection implements Rect {
   /**
-   * 
-   * @param r0 
-   * @param c0 
-   * @param r1 
-   * @param c1 
+   *
+   * @param r0
+   * @param c0
+   * @param r1
+   * @param c1
    */
   constructor(
     public r0: number,
     public c0: number,
     public r1: number,
-    public c1: number,
+    public c1: number
   ) {
     /**row/col where the selection started (for white background)*/
     this.anchorRow = r0;
@@ -68,9 +68,9 @@ export class RangeSelection implements Rect {
     return this.r0 === this.r1 && this.c0 === this.c1;
   }
   /**
-   * 
-   * @param row 
-   * @param col 
+   *
+   * @param row
+   * @param col
    */
   /**grow the rectangle but KEEP the anchor fixed*/
   extendTo(row: number, col: number): void {
@@ -79,23 +79,27 @@ export class RangeSelection implements Rect {
     this.c0 = Math.min(this.anchorCol, col);
     this.c1 = Math.max(this.anchorCol, col);
   }
-
 }
 
 /**Full set of contiguous columns (c0‒c1), all rows */
 export class ColumnRangeSelection {
   constructor(
     public c0: number,
-    public c1: number
+    public c1: number,
+    public anchorCol: number // ← fixed anchor
   ) {}
+  extendTo(col: number): void {
+    this.c0 = Math.min(this.anchorCol, col);
+    this.c1 = Math.max(this.anchorCol, col);
+  }
 }
 
-/**Full set of contiguous rows (r0‒r1), all columns */
 export class RowRangeSelection {
-  constructor(
-    public r0: number,
-    public r1: number
-  ) {}
+  constructor(public r0: number, public r1: number, public anchorRow: number) {}
+  extendTo(row: number): void {
+    this.r0 = Math.min(this.anchorRow, row);
+    this.r1 = Math.max(this.anchorRow, row);
+  }
 }
 
 /* ───────────────────  Selection manager (facade)  ────────────────────── */
@@ -114,8 +118,8 @@ export class SelectionManager {
 
   /**replace current selection */
   /**
-   * 
-   * @param sel 
+   *
+   * @param sel
    */
   set(sel: AnySelection): void {
     this.current = sel;
@@ -128,20 +132,34 @@ export class SelectionManager {
 
   /**true if the active selection is exactly one cell */
   isSingleCell(): boolean {
-    return this.current instanceof CellSelection ||
-      (this.current instanceof RangeSelection && this.current.isSingle());
+    return (
+      this.current instanceof CellSelection ||
+      (this.current instanceof RangeSelection && this.current.isSingle())
+    );
   }
 
   /**row, col of active cell (top‑left of range) – or null */
-  getActiveCell():
-    | { row: number; col: number }
-    | null {
-    if (this.current instanceof CellSelection) {
+  getActiveCell(): { row: number; col: number } | null {
+    /* single cell */ // (existing code)
+    if (this.current instanceof CellSelection)
       return { row: this.current.row, col: this.current.col };
-    }
-    if (this.current instanceof RangeSelection) {
+
+    /* rectangular range */ // (existing code)
+    if (this.current instanceof RangeSelection)
       return { row: this.current.r0, col: this.current.c0 };
-    }
+
+    /* ─── NEW: single‑header selections ─── */
+    if (this.current instanceof ColumnSelection)
+      return { row: 0, col: this.current.col }; // anchor is row 0
+    if (this.current instanceof RowSelection)
+      return { row: this.current.row, col: 0 }; // anchor is col 0
+
+    /* header‑range selections */ // (already present from your edits)
+    if (this.current instanceof ColumnRangeSelection)
+      return { row: 0, col: this.current.anchorCol };
+    if (this.current instanceof RowRangeSelection)
+      return { row: this.current.anchorRow, col: 0 };
+
     return null;
   }
 }

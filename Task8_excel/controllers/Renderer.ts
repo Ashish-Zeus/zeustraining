@@ -12,34 +12,36 @@ import {
   RowSelection,
   RangeSelection,
   ColumnRangeSelection,
-  RowRangeSelection
+  RowRangeSelection,
 } from "./Selection";
-
+import { ColWidths, RowHeights } from "./types";
 export class Renderer {
   private readonly gridColor = "#d4d4d4";
   private readonly headerBg = "#f4f6f9";
-  private readonly headerActive = "#d0e4fd";
+  private readonly headerActive = "#caead8";
   private readonly textColor = "#444";
-  private readonly selectionBorder = "#1a73e8";
-  private readonly selectionFill = "rgba(66,133,244,0.15)";
+  private readonly selectionBorder = "#107c41";
+  private readonly selectionFill = "#e8f2ec";
   private readonly font = "12px system-ui, sans-serif";
-
+  private readonly headerDivision = "#a0d8b9";
   /**
-   * 
-   * @param ctx 
-   * @param cfg 
-   * @param data 
+   *
+   * @param ctx
+   * @param cfg
+   * @param data
    */
   constructor(
     private readonly ctx: CanvasRenderingContext2D,
     private readonly cfg: GridConfig,
-    private readonly data: DataStore
-  ) { }
+    private readonly data: DataStore,
+    private readonly colW: ColWidths,
+    private readonly rowH: RowHeights
+  ) {}
 
   /**
-   * 
-   * @param vp 
-   * @param sel 
+   *
+   * @param vp
+   * @param sel
    */
   public draw(vp: Viewport, sel: AnySelection): void {
     const offX = vp.scrollX % this.cfg.defaultColWidth;
@@ -54,11 +56,11 @@ export class Renderer {
   /* ─────────────────────────  Body  ──────────────────────────────────── */
 
   /**
-   * 
-   * @param vp 
-   * @param offX 
-   * @param offY 
-   * @param sel 
+   *
+   * @param vp
+   * @param offX
+   * @param offY
+   * @param sel
    */
   private drawBody(
     vp: Viewport,
@@ -78,17 +80,18 @@ export class Renderer {
     );
     ctx.clip();
 
-    ctx.translate(cfg.headerWidth - vp.scrollX,
-      cfg.headerHeight - vp.scrollY);
+    ctx.translate(cfg.headerWidth - vp.scrollX, cfg.headerHeight - vp.scrollY);
 
     const firstCol = Math.floor(vp.scrollX / cfg.defaultColWidth);
-    const lastCol =
-      Math.min(cfg.cols - 1,
-        firstCol + Math.ceil(vp.width / cfg.defaultColWidth) + 1);
+    const lastCol = Math.min(
+      cfg.cols - 1,
+      firstCol + Math.ceil(vp.width / cfg.defaultColWidth) + 1
+    );
     const firstRow = Math.floor(vp.scrollY / cfg.defaultRowHeight);
-    const lastRow =
-      Math.min(cfg.rows - 1,
-        firstRow + Math.ceil(vp.height / cfg.defaultRowHeight) + 1);
+    const lastRow = Math.min(
+      cfg.rows - 1,
+      firstRow + Math.ceil(vp.height / cfg.defaultRowHeight) + 1
+    );
 
     /* Fill selection range (light blue) */
     if (sel instanceof RangeSelection && !sel.isSingle()) {
@@ -110,21 +113,17 @@ export class Renderer {
     } else if (sel instanceof ColumnSelection) {
       ctx.fillStyle = this.selectionFill;
       const x = sel.col * cfg.defaultColWidth;
-      ctx.fillRect(
-        x,
-        firstRow * cfg.defaultRowHeight,
-        cfg.defaultColWidth,
-        (lastRow - firstRow + 1) * cfg.defaultRowHeight
-      );
+      const h = (lastRow - firstRow + 1) * cfg.defaultRowHeight;
+      ctx.fillRect(x, firstRow * cfg.defaultRowHeight, cfg.defaultColWidth, h);
+      ctx.fillStyle = "#fffff";
+      ctx.fillRect(x, 0, cfg.defaultColWidth, cfg.defaultRowHeight);
     } else if (sel instanceof RowSelection) {
       ctx.fillStyle = this.selectionFill;
       const y = sel.row * cfg.defaultRowHeight;
-      ctx.fillRect(
-        firstCol * cfg.defaultColWidth,
-        y,
-        (lastCol - firstCol + 1) * cfg.defaultColWidth,
-        cfg.defaultRowHeight
-      );
+      const w = (lastCol - firstCol + 1) * cfg.defaultColWidth;
+      ctx.fillRect(firstCol * cfg.defaultColWidth, y, w, cfg.defaultRowHeight);
+      ctx.fillStyle = "#fffff";
+      ctx.fillRect(0, y, cfg.defaultColWidth, cfg.defaultRowHeight);
     } else if (sel instanceof ColumnRangeSelection) {
       ctx.fillStyle = this.selectionFill;
       const x = sel.c0 * cfg.defaultColWidth;
@@ -135,10 +134,15 @@ export class Renderer {
         w,
         (lastRow - firstRow + 1) * cfg.defaultRowHeight
       );
-    }
-
-    /* --- RowRangeSelection fill --- */
-    else if (sel instanceof RowRangeSelection) {
+      ctx.fillStyle = "#ffffff"; /* anchor cell */
+      ctx.fillRect(
+        sel.anchorCol * cfg.defaultColWidth, // ← fixed column
+        0, // first row
+        cfg.defaultColWidth,
+        cfg.defaultRowHeight
+      );
+    } else if (sel instanceof RowRangeSelection) {
+      /* --- RowRangeSelection fill --- */
       ctx.fillStyle = this.selectionFill;
       const y = sel.r0 * cfg.defaultRowHeight;
       const h = (sel.r1 - sel.r0 + 1) * cfg.defaultRowHeight;
@@ -147,6 +151,13 @@ export class Renderer {
         y,
         (lastCol - firstCol + 1) * cfg.defaultColWidth,
         h
+      );
+      ctx.fillStyle = "#ffffff"; /* anchor cell */
+      ctx.fillRect(
+        0, // first column
+        sel.anchorRow * cfg.defaultRowHeight, // ← fixed row
+        cfg.defaultColWidth,
+        cfg.defaultRowHeight
       );
     }
 
@@ -195,315 +206,326 @@ export class Renderer {
   /* ───────────────────  Column headers  ──────────────────────────────── */
 
   /**
-   * 
-   * @param vp 
-   * @param offX 
-   * @param sel 
+   *
+   * @param vp
+   * @param offX
+   * @param sel
    */
-  // private drawColumnHeaders(
-  //   vp: Viewport,
-  //   offX: number,
-  //   sel: AnySelection
-  // ): void {
-  //   const { ctx, cfg } = this;
-
-  //   ctx.save();
-  //   ctx.beginPath();
-  //   ctx.rect(cfg.headerWidth, 0,
-  //     vp.width - cfg.headerWidth,
-  //     cfg.headerHeight);
-  //   ctx.clip();
-
-  //   ctx.fillStyle = this.headerBg;
-  //   ctx.fillRect(cfg.headerWidth, 0,
-  //     vp.width - cfg.headerWidth, cfg.headerHeight);
-
-  //   ctx.font = this.font;
-  //   ctx.textBaseline = "middle";
-  //   ctx.textAlign = "center";
-  //   ctx.lineWidth = 1;
-
-  //   ctx.strokeStyle = this.gridColor;
-  //   ctx.beginPath();
-  //   ctx.moveTo(cfg.headerWidth + 0.5, cfg.headerHeight + 0.5);
-  //   ctx.lineTo(vp.width + 0.5, cfg.headerHeight + 0.5);
-  //   ctx.stroke();
-
-  //   const firstCol = Math.floor(vp.scrollX / cfg.defaultColWidth);
-  //   const visible = Math.ceil((vp.width - cfg.headerWidth) /
-  //     cfg.defaultColWidth) + 1;
-  //   const lastCol = Math.min(cfg.cols - 1, firstCol + visible);
-
-  //   const activeCol =
-  //     sel instanceof ColumnSelection
-  //       ? sel.col
-  //       : sel instanceof CellSelection
-  //         ? sel.col
-  //         : sel instanceof RangeSelection
-  //           ? null
-  //           : null;
-
-  //   for (let c = firstCol; c <= lastCol; c++) {
-  //     const x = cfg.headerWidth +
-  //       (c - firstCol) * cfg.defaultColWidth -
-  //       offX;
-
-  //     if (activeCol === c ||
-  //       (sel instanceof RangeSelection &&
-  //         c >= sel.c0 && c <= sel.c1)) {
-  //       ctx.fillStyle = this.headerActive;
-  //       ctx.fillRect(x, 0, cfg.defaultColWidth, cfg.headerHeight);
-  //     }
-
-  //     ctx.strokeStyle = this.gridColor;
-  //     ctx.beginPath();
-  //     ctx.moveTo(x + cfg.defaultColWidth + 0.5, 0);
-  //     ctx.lineTo(x + cfg.defaultColWidth + 0.5, cfg.headerHeight);
-  //     ctx.stroke();
-
-  //     ctx.fillStyle = this.textColor;
-  //     ctx.fillText(
-  //       this.columnName(c),
-  //       x + cfg.defaultColWidth / 2,
-  //       cfg.headerHeight / 2
-  //     );
-  //   }
-
-  //   ctx.restore();
-  // }
   /* ───────────────── Column header strip (A,B,…) ─────────────────── */
   private drawColumnHeaders(
     vp: Viewport,
-    offX: number,
+    _ox: number,
     sel: AnySelection
   ): void {
     const { ctx, cfg } = this;
 
-    /* Clip to top header strip */
     ctx.save();
     ctx.beginPath();
-    ctx.rect(cfg.headerWidth, 0,
-      vp.width - cfg.headerWidth,
-      cfg.headerHeight);
+    ctx.rect(cfg.headerWidth, 0, vp.width - cfg.headerWidth, cfg.headerHeight);
     ctx.clip();
 
-    /* Background */
+    /* background */
     ctx.fillStyle = this.headerBg;
-    ctx.fillRect(cfg.headerWidth, 0,
-      vp.width - cfg.headerWidth, cfg.headerHeight);
+    ctx.fillRect(
+      cfg.headerWidth,
+      0,
+      vp.width - cfg.headerWidth,
+      cfg.headerHeight
+    );
 
-    /* Baseline styles */
     ctx.font = this.font;
     ctx.textBaseline = "middle";
     ctx.textAlign = "center";
-    ctx.lineWidth = 1;
 
-    /* Bottom divider */
-    ctx.strokeStyle = this.gridColor;
-    ctx.beginPath();
-    ctx.moveTo(cfg.headerWidth + 0.5, cfg.headerHeight + 0.5);
-    ctx.lineTo(vp.width + 0.5, cfg.headerHeight + 0.5);
-    ctx.stroke();
+    /* find first visible column */
+    let firstCol = 0,
+      cumX = 0;
+    while (firstCol < cfg.cols && cumX + this.colW[firstCol] <= vp.scrollX) {
+      cumX += this.colW[firstCol];
+      firstCol++;
+    }
 
-    /* Visible col range */
-    const firstCol = Math.floor(vp.scrollX / cfg.defaultColWidth);
-    const visible = Math.ceil((vp.width - cfg.headerWidth) /
-      cfg.defaultColWidth) + 1;
-    const lastCol = Math.min(cfg.cols - 1, firstCol + visible);
+    let x = cfg.headerWidth - (vp.scrollX - cumX);
 
-    /* ---- iterate visible headers ---- */
-    for (let c = firstCol; c <= lastCol; c++) {
-      const x = cfg.headerWidth +
-        (c - firstCol) * cfg.defaultColWidth -
-        offX;
-
-      /* Highlight logic */
-      const inHeaderRange =
-        (sel instanceof ColumnSelection && sel.col === c) ||
+    let prevActive = false;
+    for (let c = firstCol; c < cfg.cols && x < vp.width; c++) {
+      const w = this.colW[c];
+      /* ── Classification for this column ───────────────────────── */
+      const inCellSel =
         (sel instanceof CellSelection && sel.col === c) ||
-        (sel instanceof RangeSelection && c >= sel.c0 && c <= sel.c1) ||
-        (sel instanceof ColumnRangeSelection &&
-          c >= sel.c0 && c <= sel.c1);
+        (sel instanceof RangeSelection && c >= sel.c0 && c <= sel.c1);
 
-      if (inHeaderRange) {
-        ctx.fillStyle = this.headerActive;  // blue background
-        ctx.fillRect(x, 0, cfg.defaultColWidth, cfg.headerHeight);
+      const inHdrSel =
+        (sel instanceof ColumnSelection && sel.col === c) ||
+        (sel instanceof ColumnRangeSelection && c >= sel.c0 && c <= sel.c1);
+
+      /* Look‑ahead: is next column in the header selection? */
+      const nextHdrSel =
+        (sel instanceof ColumnSelection && sel.col === c + 1) ||
+        (sel instanceof ColumnRangeSelection &&
+          c + 1 >= sel.c0 &&
+          c + 1 <= sel.c1);
+
+      /* Look‑back: was previous column in header selection?      */
+      const prevHdrSel =
+        (sel instanceof ColumnSelection && sel.col === c - 1) ||
+        (sel instanceof ColumnRangeSelection &&
+          c - 1 >= sel.c0 &&
+          c - 1 <= sel.c1);
+
+      /* ── Fill background ─────────────────────────────────────── */
+      if (inHdrSel) {
+        ctx.fillStyle = this.selectionBorder;
+        ctx.fillRect(x, 0, w, cfg.headerHeight);
+      } else if (inCellSel || sel instanceof RowRangeSelection) {
+        ctx.fillStyle = this.headerActive;
+        ctx.fillRect(x, 0, w, cfg.headerHeight);
       }
 
-      /* Right divider */
-      ctx.strokeStyle = this.gridColor;
+      /* blue bottom border for *any* active header */
+      if (inCellSel || inHdrSel || sel instanceof RowRangeSelection) {
+        ctx.strokeStyle = this.selectionBorder;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x, cfg.headerHeight - 0.5);
+        ctx.lineTo(x + w + 1, cfg.headerHeight - 0.5);
+        ctx.stroke();
+      }
+
+      /* ── Column letter ───────────────────────────────────────── */
+      ctx.fillStyle = inHdrSel ? "#ffffff" : this.textColor; // rule 2 & 3
+      ctx.fillText(this.columnName(c), x + w / 2, cfg.headerHeight / 2);
+
+      /* ── Left divider  (only one per boundary) ───────────────── */
+      if (c > firstCol) {
+        const leftActive =
+          inHdrSel ||
+          prevHdrSel || // column header selections
+          (sel instanceof CellSelection &&
+            (sel.col === c || sel.col === c - 1)) ||
+          (sel instanceof RangeSelection &&
+            ((c >= sel.c0 && c <= sel.c1) ||
+              (c - 1 >= sel.c0 && c - 1 <= sel.c1))) ||
+          sel instanceof RowRangeSelection;
+
+        ctx.strokeStyle = leftActive ? this.headerDivision : this.gridColor;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x + 0.5, 0);
+        ctx.lineTo(
+          x + 0.5,
+          leftActive ? cfg.headerHeight - 2 : cfg.headerHeight
+        ); // stops early if green to keep blue bottom visible
+        ctx.stroke();
+      }
+
+      /* ── Right divider  (drawn by THIS column) ───────────────── */
+      const rightActive =
+        inHdrSel ||
+        nextHdrSel ||
+        (sel instanceof CellSelection &&
+          (sel.col === c || sel.col === c + 1)) ||
+        (sel instanceof RangeSelection &&
+          ((c >= sel.c0 && c <= sel.c1) ||
+            (c + 1 >= sel.c0 && c + 1 <= sel.c1))) ||
+        sel instanceof RowRangeSelection;
+
+      ctx.strokeStyle =
+        inHdrSel && nextHdrSel
+          ? "#fffff"
+          : rightActive
+          ? this.headerDivision
+          : this.gridColor;
       ctx.beginPath();
-      ctx.moveTo(x + cfg.defaultColWidth + 0.5, 0);
-      ctx.lineTo(x + cfg.defaultColWidth + 0.5, cfg.headerHeight);
+      ctx.moveTo(x + w + 0.5, 0);
+      ctx.lineTo(
+        x + w + 0.5,
+        rightActive ? cfg.headerHeight - 2 : cfg.headerHeight
+      );
       ctx.stroke();
 
-      /* Letter */
-      ctx.fillStyle = this.textColor;
-      ctx.fillText(
-        this.columnName(c),
-        x + cfg.defaultColWidth / 2,
-        cfg.headerHeight / 2
-      );
+      // prevActive = active;
+      x += w;
     }
+
+    /* rightmost boundary of viewport */
+    ctx.strokeStyle = prevActive ? this.headerDivision : this.gridColor;
+    ctx.beginPath();
+    ctx.lineWidth = 1;
+    ctx.moveTo(x + 0.5, 0);
+    ctx.lineTo(x + 0.5, prevActive ? cfg.headerHeight - 2 : cfg.headerHeight);
+    ctx.stroke();
 
     ctx.restore();
   }
-
 
   /* ───────────────────  Row headers  ─────────────────────────────────── */
 
   /**
-   * 
-   * @param vp 
-   * @param offY 
-   * @param sel 
+   *
+   * @param vp
+   * @param offY
+   * @param sel
    */
-  // private drawRowHeaders(
-  //   vp: Viewport,
-  //   offY: number,
-  //   sel: AnySelection
-  // ): void {
-  //   const { ctx, cfg } = this;
-
-  //   ctx.save();
-  //   ctx.beginPath();
-  //   ctx.rect(0, cfg.headerHeight,
-  //     cfg.headerWidth,
-  //     vp.height - cfg.headerHeight);
-  //   ctx.clip();
-
-  //   ctx.fillStyle = this.headerBg;
-  //   ctx.fillRect(0, cfg.headerHeight,
-  //     cfg.headerWidth, vp.height - cfg.headerHeight);
-
-  //   ctx.font = this.font;
-  //   ctx.textBaseline = "middle";
-  //   ctx.textAlign = "center";
-  //   ctx.lineWidth = 1;
-
-  //   ctx.strokeStyle = this.gridColor;
-  //   ctx.beginPath();
-  //   ctx.moveTo(cfg.headerWidth + 0.5, cfg.headerHeight + 0.5);
-  //   ctx.lineTo(cfg.headerWidth + 0.5, vp.height + 0.5);
-  //   ctx.stroke();
-
-  //   const firstRow = Math.floor(vp.scrollY / cfg.defaultRowHeight);
-  //   const visible = Math.ceil((vp.height - cfg.headerHeight) /
-  //     cfg.defaultRowHeight) + 1;
-  //   const lastRow = Math.min(cfg.rows - 1, firstRow + visible);
-
-  //   const activeRow =
-  //     sel instanceof RowSelection
-  //       ? sel.row
-  //       : sel instanceof CellSelection
-  //         ? sel.row
-  //         : sel instanceof RangeSelection
-  //           ? null
-  //           : null;
-
-  //   for (let r = firstRow; r <= lastRow; r++) {
-  //     const y = cfg.headerHeight +
-  //       (r - firstRow) * cfg.defaultRowHeight -
-  //       offY;
-
-  //     if (activeRow === r ||
-  //       (sel instanceof RangeSelection &&
-  //         r >= sel.r0 && r <= sel.r1)) {
-  //       ctx.fillStyle = this.headerActive;
-  //       ctx.fillRect(0, y, cfg.headerWidth, cfg.defaultRowHeight);
-  //     }
-
-  //     ctx.strokeStyle = this.gridColor;
-  //     ctx.beginPath();
-  //     ctx.moveTo(0, y + cfg.defaultRowHeight + 0.5);
-  //     ctx.lineTo(cfg.headerWidth, y + cfg.defaultRowHeight + 0.5);
-  //     ctx.stroke();
-
-  //     ctx.fillStyle = this.textColor;
-  //     ctx.fillText(
-  //       String(r + 1),
-  //       cfg.headerWidth / 2,
-  //       y + cfg.defaultRowHeight / 2
-  //     );
-  //   }
-
-  //   ctx.restore();
-  // }
-  private drawRowHeaders(
-    vp: Viewport,
-    offY: number,
-    sel: AnySelection
-  ): void {
+  /* ───────── row header strip (1, 2, …) ───────── */
+  private drawRowHeaders(vp: Viewport, _oy: number, sel: AnySelection): void {
     const { ctx, cfg } = this;
 
     ctx.save();
     ctx.beginPath();
-    ctx.rect(0, cfg.headerHeight, cfg.headerWidth, vp.height - cfg.headerHeight);
+    ctx.rect(
+      0,
+      cfg.headerHeight,
+      cfg.headerWidth,
+      vp.height - cfg.headerHeight
+    );
     ctx.clip();
 
     ctx.fillStyle = this.headerBg;
-    ctx.fillRect(0, cfg.headerHeight, cfg.headerWidth, vp.height - cfg.headerHeight);
+    ctx.fillRect(
+      0,
+      cfg.headerHeight,
+      cfg.headerWidth,
+      vp.height - cfg.headerHeight
+    );
 
     ctx.font = this.font;
     ctx.textBaseline = "middle";
     ctx.textAlign = "center";
-    ctx.lineWidth = 1;
 
-    /* Right divider */
-    ctx.strokeStyle = this.gridColor;
-    ctx.beginPath();
-    ctx.moveTo(cfg.headerWidth + 0.5, cfg.headerHeight + 0.5);
-    ctx.lineTo(cfg.headerWidth + 0.5, vp.height + 0.5);
-    ctx.stroke();
+    /* first visible row */
+    let firstRow = 0,
+      cumY = 0;
+    while (firstRow < cfg.rows && cumY + this.rowH[firstRow] <= vp.scrollY) {
+      cumY += this.rowH[firstRow];
+      firstRow++;
+    }
 
-    const firstRow = Math.floor(vp.scrollY / cfg.defaultRowHeight);
-    const visible = Math.ceil((vp.height - cfg.headerHeight) / cfg.defaultRowHeight) + 1;
-    const lastRow = Math.min(cfg.rows - 1, firstRow + visible);
+    let y = cfg.headerHeight - (vp.scrollY - cumY);
 
-    for (let r = firstRow; r <= lastRow; r++) {
-      const y = cfg.headerHeight +
-        (r - firstRow) * cfg.defaultRowHeight -
-        offY;
+    let prevActive = false;
+    for (let r = firstRow; r < cfg.rows && y < vp.height; r++) {
+      const h = this.rowH[r];
 
-      /* Highlight for any kind of row selection */
-      const inHeaderRange =
-        (sel instanceof RowSelection && sel.row === r) ||
+      /* classification */
+      const inCellSel =
         (sel instanceof CellSelection && sel.row === r) ||
-        (sel instanceof RangeSelection && r >= sel.r0 && r <= sel.r1) ||
+        (sel instanceof RangeSelection && r >= sel.r0 && r <= sel.r1);
+
+      const inHdrSel =
+        (sel instanceof RowSelection && sel.row === r) ||
         (sel instanceof RowRangeSelection && r >= sel.r0 && r <= sel.r1);
 
-      if (inHeaderRange) {
-        ctx.fillStyle = this.headerActive;
-        ctx.fillRect(0, y, cfg.headerWidth, cfg.defaultRowHeight);
+      const nextHdrSel =
+        (sel instanceof RowSelection && sel.row === r + 1) ||
+        (sel instanceof RowRangeSelection &&
+          r + 1 >= sel.r0 &&
+          r + 1 <= sel.r1);
+
+      const prevHdrSel =
+        (sel instanceof RowSelection && sel.row === r - 1) ||
+        (sel instanceof RowRangeSelection &&
+          r - 1 >= sel.r0 &&
+          r - 1 <= sel.r1);
+
+      /* fills */
+      if (inHdrSel) {
+        ctx.fillStyle = this.selectionBorder; // dark green for selected header
+        ctx.fillRect(0, y, cfg.headerWidth, h);
+      } else if (inCellSel || sel instanceof ColumnRangeSelection) {
+        ctx.fillStyle = this.headerActive; // light green for range-highlighted or active cell
+        ctx.fillRect(0, y, cfg.headerWidth, h);
       }
 
-      /* Bottom border */
-      ctx.strokeStyle = this.gridColor;
-      ctx.beginPath();
-      ctx.moveTo(0, y + cfg.defaultRowHeight + 0.5);
-      ctx.lineTo(cfg.headerWidth, y + cfg.defaultRowHeight + 0.5);
-      ctx.stroke();
+      /* blue right border */
+      if (inCellSel || inHdrSel || sel instanceof ColumnRangeSelection) {
+        ctx.strokeStyle = this.selectionBorder;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(cfg.headerWidth - 1, y);
+        ctx.lineTo(cfg.headerWidth - 1, y + h + 1);
+        ctx.stroke();
+      }
 
-      /* Row label (number) */
-      ctx.fillStyle = this.textColor;
-      ctx.fillText(
-        String(r + 1),
-        cfg.headerWidth / 2,
-        y + cfg.defaultRowHeight / 2
+      /* label */
+      ctx.fillStyle = inHdrSel ? "#ffffff" : this.textColor;
+      ctx.fillText(String(r + 1), cfg.headerWidth / 2, y + h / 2);
+
+      /* top divider */
+      if (r > firstRow) {
+        const topActive =
+          inHdrSel ||
+          prevHdrSel || // row header selections
+          (sel instanceof CellSelection &&
+            (sel.row === r || sel.row === r - 1)) ||
+          (sel instanceof RangeSelection &&
+            ((r >= sel.r0 && r <= sel.r1) ||
+              (r - 1 >= sel.r0 && r - 1 <= sel.r1))) ||
+          sel instanceof ColumnRangeSelection;
+
+        ctx.strokeStyle =
+          inHdrSel && !prevHdrSel
+            ? this.selectionBorder
+            : topActive
+            ? this.headerDivision
+            : this.gridColor;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, y + 0.5);
+        ctx.lineTo(topActive ? cfg.headerWidth - 2 : cfg.headerWidth, y + 0.5);
+        ctx.stroke();
+      }
+
+      /* bottom divider */
+      const bottomActive =
+        inHdrSel ||
+        nextHdrSel ||
+        (sel instanceof CellSelection &&
+          (sel.row === r || sel.row === r + 1)) ||
+        (sel instanceof RangeSelection &&
+          ((r >= sel.r0 && r <= sel.r1) ||
+            (r + 1 >= sel.r0 && r + 1 <= sel.r1))) ||
+        sel instanceof ColumnRangeSelection;
+
+      ctx.strokeStyle =
+        inHdrSel && nextHdrSel
+          ? "#ffffff"
+          : bottomActive
+          ? this.headerDivision
+          : this.gridColor;
+
+      ctx.beginPath();
+      ctx.moveTo(0, y + h + 0.5);
+      ctx.lineTo(
+        bottomActive ? cfg.headerWidth - 2 : cfg.headerWidth,
+        y + h + 0.5
       );
+      ctx.stroke();
+      /* bottom divider */
+      
+
+      y += h;
     }
+
+    /* bottommost boundary of viewport */
+    ctx.strokeStyle = prevActive ? this.headerDivision : this.gridColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    const by = y + 0.5;
+    ctx.moveTo(0, by);
+    ctx.lineTo(prevActive ? cfg.headerWidth - 2 : cfg.headerWidth, by);
+    ctx.stroke();
 
     ctx.restore();
   }
 
-
   /* ────────────────  Border for any selection  ───────────────────────── */
 
   /**
-   * 
-   * @param vp 
-   * @param sel 
-   * @returns 
+   *
+   * @param vp
+   * @param sel
+   * @returns
    */
   private drawSelectionOutline(vp: Viewport, sel: AnySelection): void {
     if (!sel) return;
@@ -526,58 +548,36 @@ export class Renderer {
       h = 0;
 
     if (sel instanceof CellSelection) {
-      x = cfg.headerWidth +
-        sel.col * cfg.defaultColWidth -
-        vp.scrollX;
-      y = cfg.headerHeight +
-        sel.row * cfg.defaultRowHeight -
-        vp.scrollY;
+      x = cfg.headerWidth + sel.col * cfg.defaultColWidth - vp.scrollX;
+      y = cfg.headerHeight + sel.row * cfg.defaultRowHeight - vp.scrollY;
       w = cfg.defaultColWidth;
       h = cfg.defaultRowHeight;
     } else if (sel instanceof ColumnSelection) {
-      x = cfg.headerWidth +
-        sel.col * cfg.defaultColWidth -
-        vp.scrollX;
-      y = cfg.headerHeight +
-        firstVisibleRow * cfg.defaultRowHeight -
-        vp.scrollY;
+      x = cfg.headerWidth + sel.col * cfg.defaultColWidth - vp.scrollX;
+      y =
+        cfg.headerHeight + firstVisibleRow * cfg.defaultRowHeight - vp.scrollY;
       w = cfg.defaultColWidth;
-      h = visibleRows * cfg.defaultRowHeight;   // stop at last visible row
+      h = visibleRows * cfg.defaultRowHeight; // stop at last visible row
     } else if (sel instanceof RowSelection) {
-      x = cfg.headerWidth +
-        firstVisibleCol * cfg.defaultColWidth -
-        vp.scrollX;
-      y = cfg.headerHeight +
-        sel.row * cfg.defaultRowHeight -
-        vp.scrollY;
-      w = visibleCols * cfg.defaultColWidth;    // stop at last visible col
+      x = cfg.headerWidth + firstVisibleCol * cfg.defaultColWidth - vp.scrollX;
+      y = cfg.headerHeight + sel.row * cfg.defaultRowHeight - vp.scrollY;
+      w = visibleCols * cfg.defaultColWidth; // stop at last visible col
       h = cfg.defaultRowHeight;
     } else if (sel instanceof RangeSelection) {
-      x = cfg.headerWidth +
-        sel.c0 * cfg.defaultColWidth -
-        vp.scrollX;
-      y = cfg.headerHeight +
-        sel.r0 * cfg.defaultRowHeight -
-        vp.scrollY;
+      x = cfg.headerWidth + sel.c0 * cfg.defaultColWidth - vp.scrollX;
+      y = cfg.headerHeight + sel.r0 * cfg.defaultRowHeight - vp.scrollY;
       w = (sel.c1 - sel.c0 + 1) * cfg.defaultColWidth;
       h = (sel.r1 - sel.r0 + 1) * cfg.defaultRowHeight;
-    }
-    /* Column‑range border */
-    else if (sel instanceof ColumnRangeSelection) {
-      x = cfg.headerWidth +
-        sel.c0 * cfg.defaultColWidth -
-        vp.scrollX;
+    } else if (sel instanceof ColumnRangeSelection) {
+      /* Column‑range border */
+      x = cfg.headerWidth + sel.c0 * cfg.defaultColWidth - vp.scrollX;
       y = cfg.headerHeight;
       w = (sel.c1 - sel.c0 + 1) * cfg.defaultColWidth;
       h = vp.height - cfg.headerHeight;
-    }
-
-    /* Row‑range border */
-    else if (sel instanceof RowRangeSelection) {
+    } else if (sel instanceof RowRangeSelection) {
+      /* Row‑range border */
       x = cfg.headerWidth;
-      y = cfg.headerHeight +
-        sel.r0 * cfg.defaultRowHeight -
-        vp.scrollY;
+      y = cfg.headerHeight + sel.r0 * cfg.defaultRowHeight - vp.scrollY;
       w = vp.width - cfg.headerWidth;
       h = (sel.r1 - sel.r0 + 1) * cfg.defaultRowHeight;
     }
@@ -594,7 +594,7 @@ export class Renderer {
 
     ctx.strokeStyle = this.selectionBorder;
     ctx.lineWidth = 2;
-    ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+    ctx.strokeRect(x + 1, y + 1, w - 1, h - 1);
 
     ctx.restore();
   }
@@ -602,9 +602,9 @@ export class Renderer {
   /* ───────────────────────────  helper  ─────────────────────────────── */
 
   /**
-   * 
-   * @param col 
-   * @returns 
+   *
+   * @param col
+   * @returns
    */
   private columnName(col: number): string {
     let name = "";
