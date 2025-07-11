@@ -6,7 +6,7 @@ import { Renderer } from "./Renderer.js";
 import { DataStore } from "./DataStore.js";
 import { KeyNavigator } from "./KeyNavigator.js";
 import { AutoScroller } from "./AutoScroller.js";
-import { SelectionManager, CellSelection, RangeSelection, ColumnRangeSelection, RowRangeSelection, } from "./Selection.js";
+import { SelectionManager, CellSelection, ColumnSelection, RowSelection, RangeSelection, ColumnRangeSelection, RowRangeSelection, } from "./Selection.js";
 export class Grid {
     /**
      *
@@ -25,6 +25,15 @@ export class Grid {
         this.pointer = { x: 0, y: 0 }; // tracks mouse pos
         this.dragHeaderMode = null;
         this.headerAnchor = null; // col index or row index
+        this.isResizingCol = false;
+        this.isResizingRow = false;
+        this.resizingColIndex = -1;
+        this.resizingRowIndex = -1;
+        this.startX = 0;
+        this.startY = 0;
+        this.initialWidth = 0;
+        this.initialHeight = 0;
+        this.RESIZE_MARGIN = 5;
         /* ─────────────────────────  Mouse interaction  ─────────────────────── */
         /**
          *
@@ -34,6 +43,39 @@ export class Grid {
         this.onMouseDown = (e) => {
             /* ── Abort if the click is on a scrollbar ─────────────────────────── */
             const rect = this.scroller.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const scrollX = this.viewport.scrollX;
+            const scrollY = this.viewport.scrollY;
+            // Handle column resizing
+            const inColHeader = y < this.cfg.headerHeight;
+            const inRowHeader = x < this.cfg.headerWidth;
+            if (inColHeader) {
+                let cumWidth = this.cfg.headerWidth;
+                for (let c = 0; c < this.cfg.cols; c++) {
+                    cumWidth += this.colW[c];
+                    if (Math.abs(x + scrollX - cumWidth) < this.RESIZE_MARGIN) {
+                        this.isResizingCol = true;
+                        this.resizingColIndex = c;
+                        this.startX = x;
+                        this.initialWidth = this.colW[c];
+                        return;
+                    }
+                }
+            }
+            if (inRowHeader) {
+                let cumHeight = this.cfg.headerHeight;
+                for (let r = 0; r < this.cfg.rows; r++) {
+                    cumHeight += this.rowH[r];
+                    if (Math.abs(y + scrollY - cumHeight) < this.RESIZE_MARGIN) {
+                        this.isResizingRow = true;
+                        this.resizingRowIndex = r;
+                        this.startY = y;
+                        this.initialHeight = this.rowH[r];
+                        return;
+                    }
+                }
+            }
             const onVScroll = e.clientX > rect.left + this.scroller.clientWidth;
             const onHScroll = e.clientY > rect.top + this.scroller.clientHeight;
             if (onVScroll || onHScroll)
@@ -94,6 +136,50 @@ export class Grid {
                 return; // ignore while editing
             /* Always keep global pointer fresh (needed for AutoScroller) */
             this.updatePointer(e);
+            this.scroller.style.cursor = 'default';
+            const rect = this.scroller.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const scrollX = this.viewport.scrollX;
+            const scrollY = this.viewport.scrollY;
+            const inColHeader = y < this.cfg.headerHeight;
+            const inRowHeader = x < this.cfg.headerWidth;
+            if (this.isResizingCol) {
+                const dx = x - this.startX;
+                this.colW[this.resizingColIndex] = Math.max(20, this.initialWidth + dx);
+                this.render();
+                this.scroller.style.cursor = 'col-resize';
+                return;
+            }
+            if (this.isResizingRow) {
+                const dy = y - this.startY;
+                this.rowH[this.resizingRowIndex] = Math.max(20, this.initialHeight + dy);
+                this.render();
+                this.scroller.style.cursor = 'row-resize';
+                return;
+            }
+            let cursor = 'default';
+            if (inColHeader) {
+                let cumWidth = this.cfg.headerWidth;
+                for (let c = 0; c < this.cfg.cols; c++) {
+                    cumWidth += this.colW[c];
+                    if (Math.abs(x + scrollX - cumWidth) < this.RESIZE_MARGIN) {
+                        cursor = 'col-resize';
+                        break;
+                    }
+                }
+            }
+            if (inRowHeader) {
+                let cumHeight = this.cfg.headerHeight;
+                for (let r = 0; r < this.cfg.rows; r++) {
+                    cumHeight += this.rowH[r];
+                    if (Math.abs(y + scrollY - cumHeight) < this.RESIZE_MARGIN) {
+                        cursor = 'row-resize';
+                        break;
+                    }
+                }
+            }
+            this.scroller.style.cursor = cursor;
             /* ======================================================== */
             /* A.  COLUMN‑HEADER drag  (multi‑column selection)         */
             /* ======================================================== */
@@ -109,7 +195,7 @@ export class Grid {
                         this.sel.set(new ColumnRangeSelection(Math.min(this.headerAnchor, col), Math.max(this.headerAnchor, col), this.headerAnchor // ← anchor
                         ));
                     }
-                    this.auto.start();
+                    this.auto.start("x");
                     this.render();
                 }
                 return; // done for this event
@@ -128,7 +214,7 @@ export class Grid {
                     else {
                         this.sel.set(new RowRangeSelection(Math.min(this.headerAnchor, row), Math.max(this.headerAnchor, row), this.headerAnchor));
                     }
-                    this.auto.start();
+                    this.auto.start("y");
                     this.render();
                 }
                 return; // done for this event
@@ -138,7 +224,7 @@ export class Grid {
             /* ======================================================== */
             if (!this.dragAnchor)
                 return;
-            this.auto.start(); // keep auto‑scroll running
+            this.auto.start("both"); // keep auto‑scroll running
             /* Convert pointer to current row / col */
             const { row, col } = this.bodyCoordsFromEvent(e);
             /* ----- Ensure we have a RangeSelection and keep the anchor fixed ----- */
@@ -158,6 +244,10 @@ export class Grid {
         this.onMouseUp = () => {
             if (this.editing)
                 return;
+            this.isResizingCol = false;
+            this.isResizingRow = false;
+            this.resizingColIndex = -1;
+            this.resizingRowIndex = -1;
             this.dragAnchor = null;
             this.dragHeaderMode = null;
             this.headerAnchor = null;
@@ -242,7 +332,6 @@ export class Grid {
             this.sel.set(range);
             this.render();
         };
-        /* ────────────────────────────  Editing  ────────────────────────────── */
         /* ──────────────────────── Typing when not editing ─────────────────────── */
         /**
          *
@@ -256,11 +345,39 @@ export class Grid {
             /* printable single character only, no Ctrl/Cmd/Alt */
             if (e.key.length !== 1 || e.ctrlKey || e.metaKey || e.altKey)
                 return;
-            const active = this.sel.getActiveCell();
-            if (!active)
+            const sel = this.sel.get();
+            let targetRow = null;
+            let targetCol = null;
+            if (sel instanceof RangeSelection) {
+                targetRow = sel.anchorRow;
+                targetCol = sel.anchorCol;
+            }
+            else if (sel instanceof CellSelection) {
+                targetRow = sel.row;
+                targetCol = sel.col;
+            }
+            else if (sel instanceof RowSelection) {
+                targetRow = sel.row;
+                targetCol = 0;
+            }
+            else if (sel instanceof ColumnSelection) {
+                targetRow = 0;
+                targetCol = sel.col;
+            }
+            else if (sel instanceof RowRangeSelection) {
+                targetRow = sel.anchorRow;
+                targetCol = 0;
+            }
+            else if (sel instanceof ColumnRangeSelection) {
+                targetRow = 0;
+                targetCol = sel.anchorCol;
+            }
+            // const active = this.sel.getActiveCell();
+            // if (!active) return;
+            if (targetRow === null || targetCol === null)
                 return;
             /* begin overwrite edit with the typed char (caret hidden) */
-            this.openEditor(active.row, active.col, e.key, /*overwrite=*/ true);
+            this.openEditor(targetRow, targetCol, e.key, /*overwrite=*/ true);
             e.preventDefault(); // block browser hotkeys (e.g. space scroll)
         };
         const wrap = document.getElementById("excel-wrapper");
@@ -316,24 +433,21 @@ export class Grid {
             /* reset all transforms then scale to new DPR */
             this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
         }
-        /* 2. Give the canvas enough backing pixels for the new DPR */
         this.canvas.width = Math.floor(w * this.dpr);
         this.canvas.height = Math.floor(h * this.dpr);
-        /* 3. DO NOT touch canvas.style.width/height — let CSS keep it 100 % */
-        /*    (explicit pixel sizes caused the “canvas got smaller” problem)  */
         /* 4. Logical viewport size */
         this.viewport.width = w;
         this.viewport.height = h;
-        /* 5. Scrollable spacer stays the same logic */
-        this.spacer.style.width = `${this.cfg.headerWidth + this.cfg.cols * this.cfg.defaultColWidth}px`;
-        this.spacer.style.height = `${this.cfg.headerHeight + this.cfg.rows * this.cfg.defaultRowHeight}px`;
+        /* 5. Scrollable spacer logic */
+        const totalColWidth = this.colW.reduce((a, b) => a + b, 0);
+        const totalRowHeight = this.rowH.reduce((a, b) => a + b, 0);
+        this.spacer.style.width = `${this.cfg.headerWidth + totalColWidth}px`;
+        this.spacer.style.height = `${this.cfg.headerHeight + totalRowHeight}px`;
         this.render();
     }
     /* ─────────────────────────────  Rendering  ─────────────────────────── */
     render() {
-        // this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        // this.rend.draw(this.viewport, this.sel.get());
-        /* Always draw at correct device‑pixel ratio */
+        /*draw at correct dpr */
         this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
         /* Clear entire Hi‑DPI backing store */
         this.ctx.clearRect(0, 0, this.canvas.width / this.dpr, this.canvas.height / this.dpr);
@@ -393,10 +507,22 @@ export class Grid {
         const rect = this.scroller.getBoundingClientRect();
         const localX = e.clientX - rect.left;
         const localY = e.clientY - rect.top;
-        const col = Math.floor((localX + this.viewport.scrollX - this.cfg.headerWidth) /
-            this.cfg.defaultColWidth);
-        const row = Math.floor((localY + this.viewport.scrollY - this.cfg.headerHeight) /
-            this.cfg.defaultRowHeight);
+        let colX = this.cfg.headerWidth;
+        let col = 0;
+        let xOffset = localX + this.viewport.scrollX;
+        for (; col < this.cfg.cols; col++) {
+            colX += this.colW[col];
+            if (xOffset < colX)
+                break;
+        }
+        let rowY = this.cfg.headerHeight;
+        let row = 0;
+        let yOffset = localY + this.viewport.scrollY;
+        for (; row < this.cfg.rows; row++) {
+            rowY += this.rowH[row];
+            if (yOffset < rowY)
+                break;
+        }
         /* clamp to sheet edges */
         return {
             row: this.clamp(row, 0, this.cfg.rows - 1),
@@ -413,24 +539,46 @@ export class Grid {
         const rect = this.scroller.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
+        const scrollX = this.viewport.scrollX;
+        const scrollY = this.viewport.scrollY;
+        const canvasX = x - this.cfg.headerWidth + scrollX;
+        const canvasY = y - this.cfg.headerHeight + scrollY;
+        let region;
         if (x < this.cfg.headerWidth && y < this.cfg.headerHeight) {
-            return { row: null, col: null, region: "corner" };
+            region = "corner";
         }
-        if (x < this.cfg.headerWidth) {
-            const row = Math.floor((y + this.viewport.scrollY - this.cfg.headerHeight) /
-                this.cfg.defaultRowHeight);
-            return { row, col: null, region: "rowHeader" };
+        else if (x < this.cfg.headerWidth) {
+            region = "rowHeader";
         }
-        if (y < this.cfg.headerHeight) {
-            const col = Math.floor((x + this.viewport.scrollX - this.cfg.headerWidth) /
-                this.cfg.defaultColWidth);
-            return { row: null, col, region: "colHeader" };
+        else if (y < this.cfg.headerHeight) {
+            region = "colHeader";
         }
-        const col = Math.floor((x + this.viewport.scrollX - this.cfg.headerWidth) /
-            this.cfg.defaultColWidth);
-        const row = Math.floor((y + this.viewport.scrollY - this.cfg.headerHeight) /
-            this.cfg.defaultRowHeight);
-        return { row, col, region: "body" };
+        else {
+            region = "body";
+        }
+        let col = null;
+        if (region === "body" || region === "colHeader") {
+            let acc = 0;
+            for (let c = 0; c < this.colW.length; c++) {
+                acc += this.colW[c];
+                if (canvasX < acc) {
+                    col = c;
+                    break;
+                }
+            }
+        }
+        let row = null;
+        if (region === "body" || region === "rowHeader") {
+            let acc = 0;
+            for (let r = 0; r < this.rowH.length; r++) {
+                acc += this.rowH[r];
+                if (canvasY < acc) {
+                    row = r;
+                    break;
+                }
+            }
+        }
+        return { row, col, region };
     }
     /* ──────────────────────── Editing a cell ─────────────────────── */
     /**
@@ -465,11 +613,15 @@ export class Grid {
         /* stop clicks bubbling out of the editor */
         input.addEventListener("mousedown", (ev) => ev.stopPropagation(), true);
         /* locate over cell */
-        input.style.left = `${this.cfg.headerWidth + col * this.cfg.defaultColWidth}px`;
-        input.style.top = `${this.cfg.headerHeight + row * this.cfg.defaultRowHeight}px`;
-        /* width/height stay the same */
-        input.style.width = `${this.cfg.defaultColWidth + 0.5}px`;
-        input.style.height = `${this.cfg.defaultRowHeight + 0.5}px`;
+        const x = this.cfg.headerWidth + this.colW.slice(0, col).reduce((a, b) => a + b, 0);
+        const y = this.cfg.headerHeight +
+            this.rowH.slice(0, row).reduce((a, b) => a + b, 0);
+        const width = this.colW[col];
+        const height = this.rowH[row];
+        input.style.left = `${x}px`;
+        input.style.top = `${y}px`;
+        input.style.width = `${width + 0.5}px`;
+        input.style.height = `${height + 0.5}px`;
         this.scroller.appendChild(input);
         input.focus();
         if (overwrite) {

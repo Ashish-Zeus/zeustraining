@@ -62,146 +62,485 @@ export class Renderer {
    * @param offY
    * @param sel
    */
+  // private drawBody(
+  //   vp: Viewport,
+  //   offX: number,
+  //   offY: number,
+  //   sel: AnySelection
+  // ): void {
+  //   const { ctx, cfg } = this;
+  //   const { colW, rowH } = this;
+  //   ctx.save();
+  //   ctx.beginPath();
+  //   ctx.rect(
+  //     cfg.headerWidth,
+  //     cfg.headerHeight,
+  //     vp.width - cfg.headerWidth,
+  //     vp.height - cfg.headerHeight
+  //   );
+  //   ctx.clip();
+
+  //   ctx.translate(cfg.headerWidth - vp.scrollX, cfg.headerHeight - vp.scrollY);
+
+  //   const firstCol = Math.floor(vp.scrollX / cfg.defaultColWidth);
+  //   const lastCol = Math.min(
+  //     cfg.cols - 1,
+  //     firstCol + Math.ceil(vp.width / cfg.defaultColWidth) + 1
+  //   );
+  //   const firstRow = Math.floor(vp.scrollY / cfg.defaultRowHeight);
+  //   const lastRow = Math.min(
+  //     cfg.rows - 1,
+  //     firstRow + Math.ceil(vp.height / cfg.defaultRowHeight) + 1
+  //   );
+
+  //   /* Fill selection range (light blue) */
+  //   if (sel instanceof RangeSelection && !sel.isSingle()) {
+  //     // 2‑D coords of the whole blue area
+  //     // const rangeX = sel.c0 * cfg.defaultColWidth;
+  //     // const rangeY = sel.r0 * cfg.defaultRowHeight;
+  //     // const rangeW = (sel.c1 - sel.c0 + 1) * cfg.defaultColWidth;
+  //     // const rangeH = (sel.r1 - sel.r0 + 1) * cfg.defaultRowHeight;
+  //     const rangeX = colW.slice(0, sel.c0).reduce((a, b) => a + b, 0);
+  //     const rangeY = rowH.slice(0, sel.r0).reduce((a, b) => a + b, 0);
+  //     const rangeW = colW.slice(sel.c0, sel.c1 + 1).reduce((a, b) => a + b, 0);
+  //     const rangeH = rowH.slice(sel.r0, sel.r1 + 1).reduce((a, b) => a + b, 0);
+
+  //     /*  Fill everything blue */
+  //     ctx.fillStyle = this.selectionFill; // blue rgba(…)
+  //     ctx.fillRect(rangeX, rangeY, rangeW, rangeH);
+
+  //     /* Overpaint anchor cell white so it stands out */
+  //     // const anchorX = sel.anchorCol * cfg.defaultColWidth;
+  //     // const anchorY = sel.anchorRow * cfg.defaultRowHeight;
+  //     const anchorX = colW.slice(0, sel.anchorCol).reduce((a, b) => a + b, 0);
+  //     const anchorY = rowH.slice(0, sel.anchorRow).reduce((a, b) => a + b, 0);
+
+  //     ctx.fillStyle = "#ffffff";
+  //     ctx.fillRect(anchorX, anchorY, cfg.defaultColWidth, cfg.defaultRowHeight);
+  //   } else if (sel instanceof ColumnSelection) {
+  //     ctx.fillStyle = this.selectionFill;
+  //     const x = sel.col * cfg.defaultColWidth;
+  //     const h = (lastRow - firstRow + 1) * cfg.defaultRowHeight;
+  //     ctx.fillRect(x, firstRow * cfg.defaultRowHeight, cfg.defaultColWidth, h);
+  //     ctx.fillStyle = "#fffff";
+  //     ctx.fillRect(x, 0, cfg.defaultColWidth, cfg.defaultRowHeight);
+  //   } else if (sel instanceof RowSelection) {
+  //     ctx.fillStyle = this.selectionFill;
+  //     const y = sel.row * cfg.defaultRowHeight;
+  //     const w = (lastCol - firstCol + 1) * cfg.defaultColWidth;
+  //     ctx.fillRect(firstCol * cfg.defaultColWidth, y, w, cfg.defaultRowHeight);
+  //     ctx.fillStyle = "#fffff";
+  //     ctx.fillRect(0, y, cfg.defaultColWidth, cfg.defaultRowHeight);
+  //   } else if (sel instanceof ColumnRangeSelection) {
+  //     ctx.fillStyle = this.selectionFill;
+  //     const x = sel.c0 * cfg.defaultColWidth;
+  //     const w = (sel.c1 - sel.c0 + 1) * cfg.defaultColWidth;
+  //     ctx.fillRect(
+  //       x,
+  //       firstRow * cfg.defaultRowHeight,
+  //       w,
+  //       (lastRow - firstRow + 1) * cfg.defaultRowHeight
+  //     );
+  //     ctx.fillStyle = "#ffffff"; /* anchor cell */
+  //     ctx.fillRect(
+  //       sel.anchorCol * cfg.defaultColWidth, // ← fixed column
+  //       0, // first row
+  //       cfg.defaultColWidth,
+  //       cfg.defaultRowHeight
+  //     );
+  //   } else if (sel instanceof RowRangeSelection) {
+  //     /* --- RowRangeSelection fill --- */
+  //     ctx.fillStyle = this.selectionFill;
+  //     const y = sel.r0 * cfg.defaultRowHeight;
+  //     const h = (sel.r1 - sel.r0 + 1) * cfg.defaultRowHeight;
+  //     ctx.fillRect(
+  //       firstCol * cfg.defaultColWidth,
+  //       y,
+  //       (lastCol - firstCol + 1) * cfg.defaultColWidth,
+  //       h
+  //     );
+  //     ctx.fillStyle = "#ffffff"; /* anchor cell */
+  //     ctx.fillRect(
+  //       0, // first column
+  //       sel.anchorRow * cfg.defaultRowHeight, // ← fixed row
+  //       cfg.defaultColWidth,
+  //       cfg.defaultRowHeight
+  //     );
+  //   }
+
+  //   /* Grid lines */
+  //   ctx.lineWidth = 1;
+  //   ctx.strokeStyle = this.gridColor;
+
+  //   ctx.beginPath(); // vertical
+  //   for (let c = firstCol; c <= lastCol + 1; c++) {
+  //     const x = c * cfg.defaultColWidth + 0.5;
+  //     ctx.moveTo(x, firstRow * cfg.defaultRowHeight);
+  //     ctx.lineTo(x, (lastRow + 1) * cfg.defaultRowHeight);
+  //   }
+  //   ctx.stroke();
+
+  //   ctx.beginPath(); // horizontal
+  //   for (let r = firstRow; r <= lastRow + 1; r++) {
+  //     const y = r * cfg.defaultRowHeight + 0.5;
+  //     ctx.moveTo(firstCol * cfg.defaultColWidth, y);
+  //     ctx.lineTo((lastCol + 1) * cfg.defaultColWidth, y);
+  //   }
+  //   ctx.stroke();
+
+  //   /* Values */
+  //   ctx.font = this.font;
+  //   ctx.fillStyle = this.textColor;
+  //   ctx.textBaseline = "middle";
+  //   ctx.textAlign = "left";
+
+  //   const padX = 4;
+
+  //   for (let r = firstRow; r <= lastRow; r++) {
+  //     for (let c = firstCol; c <= lastCol; c++) {
+  //       const val = this.data.get(r, c);
+  //       if (!val) continue;
+
+  //       const x = c * cfg.defaultColWidth + padX;
+  //       const y = r * cfg.defaultRowHeight + cfg.defaultRowHeight / 2;
+  //       ctx.fillText(val, x, y);
+  //     }
+  //   }
+
+  //   ctx.restore();
+  // }
+
+  // private drawBody(
+  //   vp: Viewport,
+  //   offX: number,
+  //   offY: number,
+  //   sel: AnySelection
+  // ): void {
+  //   const { ctx, cfg } = this;
+  //   const { colW, rowH } = this;
+
+  //   ctx.save();
+  //   ctx.beginPath();
+  //   ctx.rect(
+  //     cfg.headerWidth,
+  //     cfg.headerHeight,
+  //     vp.width - cfg.headerWidth,
+  //     vp.height - cfg.headerHeight
+  //   );
+  //   ctx.clip();
+
+  //   // Offset drawing context for scroll
+  //   ctx.translate(cfg.headerWidth - vp.scrollX, cfg.headerHeight - vp.scrollY);
+
+  //   // Determine visible range based on scroll and actual col widths
+  //   let accWidth = 0,
+  //     firstCol = 0;
+  //   for (; firstCol < colW.length && accWidth < vp.scrollX; firstCol++) {
+  //     accWidth += colW[firstCol];
+  //   }
+
+  //   let accColWidth = accWidth,
+  //     lastCol = firstCol;
+  //   for (
+  //     ;
+  //     lastCol < colW.length && accColWidth < vp.scrollX + vp.width;
+  //     lastCol++
+  //   ) {
+  //     accColWidth += colW[lastCol];
+  //   }
+
+  //   let accHeight = 0,
+  //     firstRow = 0;
+  //   for (; firstRow < rowH.length && accHeight < vp.scrollY; firstRow++) {
+  //     accHeight += rowH[firstRow];
+  //   }
+
+  //   let accRowHeight = accHeight,
+  //     lastRow = firstRow;
+  //   for (
+  //     ;
+  //     lastRow < rowH.length && accRowHeight < vp.scrollY + vp.height;
+  //     lastRow++
+  //   ) {
+  //     accRowHeight += rowH[lastRow];
+  //   }
+
+  //   /* Fill selection */
+  //   if (sel instanceof RangeSelection && !sel.isSingle()) {
+  //     const rangeX = colW.slice(0, sel.c0).reduce((a, b) => a + b, 0);
+  //     const rangeY = rowH.slice(0, sel.r0).reduce((a, b) => a + b, 0);
+  //     const rangeW = colW.slice(sel.c0, sel.c1 + 1).reduce((a, b) => a + b, 0);
+  //     const rangeH = rowH.slice(sel.r0, sel.r1 + 1).reduce((a, b) => a + b, 0);
+
+  //     ctx.fillStyle = this.selectionFill;
+  //     ctx.fillRect(rangeX, rangeY, rangeW, rangeH);
+
+  //     const anchorX = colW.slice(0, sel.anchorCol).reduce((a, b) => a + b, 0);
+  //     const anchorY = rowH.slice(0, sel.anchorRow).reduce((a, b) => a + b, 0);
+
+  //     ctx.fillStyle = "#ffffff";
+  //     ctx.fillRect(anchorX, anchorY, colW[sel.anchorCol], rowH[sel.anchorRow]);
+  //   } else if (sel instanceof CellSelection) {
+  //     const x = colW.slice(0, sel.col).reduce((a, b) => a + b, 0);
+  //     const y = rowH.slice(0, sel.row).reduce((a, b) => a + b, 0);
+  //     const w = colW[sel.col];
+  //     const h = rowH[sel.row];
+
+  //     ctx.fillStyle = this.selectionFill;
+  //     ctx.fillRect(x, y, w, h);
+
+  //     ctx.fillStyle = "#ffffff";
+  //     ctx.fillRect(x, y, w, h);
+  //   } else if (sel instanceof ColumnSelection) {
+  //     const x = colW.slice(0, sel.col).reduce((a, b) => a + b, 0);
+  //     const w = colW[sel.col];
+  //     const h = rowH.slice(firstRow, lastRow + 1).reduce((a, b) => a + b, 0);
+  //     const y = rowH.slice(0, firstRow).reduce((a, b) => a + b, 0);
+
+  //     ctx.fillStyle = this.selectionFill;
+  //     ctx.fillRect(x, y, w, h);
+
+  //     ctx.fillStyle = "#ffffff";
+  //     ctx.fillRect(x, 0, w, rowH[0]);
+  //   } else if (sel instanceof RowSelection) {
+  //     const y = rowH.slice(0, sel.row).reduce((a, b) => a + b, 0);
+  //     const h = rowH[sel.row];
+  //     const w = colW.slice(firstCol, lastCol + 1).reduce((a, b) => a + b, 0);
+  //     const x = colW.slice(0, firstCol).reduce((a, b) => a + b, 0);
+
+  //     ctx.fillStyle = this.selectionFill;
+  //     ctx.fillRect(x, y, w, h);
+
+  //     ctx.fillStyle = "#ffffff";
+  //     ctx.fillRect(0, y, colW[0], h);
+  //   } else if (sel instanceof ColumnRangeSelection) {
+  //     const x = colW.slice(0, sel.c0).reduce((a, b) => a + b, 0);
+  //     const w = colW.slice(sel.c0, sel.c1 + 1).reduce((a, b) => a + b, 0);
+  //     const y = rowH.slice(0, firstRow).reduce((a, b) => a + b, 0);
+  //     const h = rowH.slice(firstRow, lastRow + 1).reduce((a, b) => a + b, 0);
+
+  //     ctx.fillStyle = this.selectionFill;
+  //     ctx.fillRect(x, y, w, h);
+
+  //     const anchorX = colW.slice(0, sel.anchorCol).reduce((a, b) => a + b, 0);
+  //     ctx.fillStyle = "#ffffff";
+  //     ctx.fillRect(anchorX, 0, colW[sel.anchorCol], rowH[0]);
+  //   } else if (sel instanceof RowRangeSelection) {
+  //     const y = rowH.slice(0, sel.r0).reduce((a, b) => a + b, 0);
+  //     const h = rowH.slice(sel.r0, sel.r1 + 1).reduce((a, b) => a + b, 0);
+  //     const x = colW.slice(0, firstCol).reduce((a, b) => a + b, 0);
+  //     const w = colW.slice(firstCol, lastCol + 1).reduce((a, b) => a + b, 0);
+
+  //     ctx.fillStyle = this.selectionFill;
+  //     ctx.fillRect(x, y, w, h);
+
+  //     const anchorY = rowH.slice(0, sel.anchorRow).reduce((a, b) => a + b, 0);
+  //     ctx.fillStyle = "#ffffff";
+  //     ctx.fillRect(0, anchorY, colW[0], rowH[sel.anchorRow]);
+  //   }
+
+  //   /* Grid lines */
+  //   ctx.lineWidth = 1;
+  //   ctx.strokeStyle = this.gridColor;
+
+  //   ctx.beginPath(); // vertical
+  //   let x = 0.5;
+  //   for (let c = 0; c <= lastCol + 1; c++) {
+  //     ctx.moveTo(x, 0);
+  //     ctx.lineTo(x, accRowHeight);
+  //     x += colW[c] ?? cfg.defaultColWidth;
+  //   }
+  //   ctx.stroke();
+
+  //   ctx.beginPath(); // horizontal
+  //   let y = 0.5;
+  //   for (let r = 0; r <= lastRow + 1; r++) {
+  //     ctx.moveTo(0, y);
+  //     ctx.lineTo(accColWidth, y);
+  //     y += rowH[r] ?? cfg.defaultRowHeight;
+  //   }
+  //   ctx.stroke();
+
+  //   /* Values */
+  //   ctx.font = this.font;
+  //   ctx.fillStyle = this.textColor;
+  //   ctx.textBaseline = "middle";
+  //   ctx.textAlign = "left";
+
+  //   const padX = 4;
+  //   let drawY = rowH.slice(0, firstRow).reduce((a, b) => a + b, 0);
+
+  //   for (let r = firstRow; r <= lastRow; r++) {
+  //     let drawX = colW.slice(0, firstCol).reduce((a, b) => a + b, 0);
+  //     for (let c = firstCol; c <= lastCol; c++) {
+  //       const val = this.data.get(r, c);
+  //       if (val) {
+  //         ctx.fillText(val, drawX + padX, drawY + rowH[r] / 2);
+  //       }
+  //       drawX += colW[c];
+  //     }
+  //     drawY += rowH[r];
+  //   }
+
+  //   ctx.restore();
+  // }
+
   private drawBody(
-    vp: Viewport,
-    offX: number,
-    offY: number,
-    sel: AnySelection
-  ): void {
-    const { ctx, cfg } = this;
+  vp: Viewport,
+  offX: number,
+  offY: number,
+  sel: AnySelection
+): void {
+  const { ctx, cfg } = this;
+  const { colW, rowH } = this;
 
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(
-      cfg.headerWidth,
-      cfg.headerHeight,
-      vp.width - cfg.headerWidth,
-      vp.height - cfg.headerHeight
-    );
-    ctx.clip();
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(
+    cfg.headerWidth,
+    cfg.headerHeight,
+    vp.width - cfg.headerWidth,
+    vp.height - cfg.headerHeight
+  );
+  ctx.clip();
 
-    ctx.translate(cfg.headerWidth - vp.scrollX, cfg.headerHeight - vp.scrollY);
+  // Apply scroll offsets to canvas context
+  ctx.translate(cfg.headerWidth - vp.scrollX, cfg.headerHeight - vp.scrollY);
 
-    const firstCol = Math.floor(vp.scrollX / cfg.defaultColWidth);
-    const lastCol = Math.min(
-      cfg.cols - 1,
-      firstCol + Math.ceil(vp.width / cfg.defaultColWidth) + 1
-    );
-    const firstRow = Math.floor(vp.scrollY / cfg.defaultRowHeight);
-    const lastRow = Math.min(
-      cfg.rows - 1,
-      firstRow + Math.ceil(vp.height / cfg.defaultRowHeight) + 1
-    );
-
-    /* Fill selection range (light blue) */
-    if (sel instanceof RangeSelection && !sel.isSingle()) {
-      // 2‑D coords of the whole blue area
-      const rangeX = sel.c0 * cfg.defaultColWidth;
-      const rangeY = sel.r0 * cfg.defaultRowHeight;
-      const rangeW = (sel.c1 - sel.c0 + 1) * cfg.defaultColWidth;
-      const rangeH = (sel.r1 - sel.r0 + 1) * cfg.defaultRowHeight;
-
-      /*  Fill everything blue */
-      ctx.fillStyle = this.selectionFill; // blue rgba(…)
-      ctx.fillRect(rangeX, rangeY, rangeW, rangeH);
-
-      /* Overpaint anchor cell white so it stands out */
-      const anchorX = sel.anchorCol * cfg.defaultColWidth;
-      const anchorY = sel.anchorRow * cfg.defaultRowHeight;
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(anchorX, anchorY, cfg.defaultColWidth, cfg.defaultRowHeight);
-    } else if (sel instanceof ColumnSelection) {
-      ctx.fillStyle = this.selectionFill;
-      const x = sel.col * cfg.defaultColWidth;
-      const h = (lastRow - firstRow + 1) * cfg.defaultRowHeight;
-      ctx.fillRect(x, firstRow * cfg.defaultRowHeight, cfg.defaultColWidth, h);
-      ctx.fillStyle = "#fffff";
-      ctx.fillRect(x, 0, cfg.defaultColWidth, cfg.defaultRowHeight);
-    } else if (sel instanceof RowSelection) {
-      ctx.fillStyle = this.selectionFill;
-      const y = sel.row * cfg.defaultRowHeight;
-      const w = (lastCol - firstCol + 1) * cfg.defaultColWidth;
-      ctx.fillRect(firstCol * cfg.defaultColWidth, y, w, cfg.defaultRowHeight);
-      ctx.fillStyle = "#fffff";
-      ctx.fillRect(0, y, cfg.defaultColWidth, cfg.defaultRowHeight);
-    } else if (sel instanceof ColumnRangeSelection) {
-      ctx.fillStyle = this.selectionFill;
-      const x = sel.c0 * cfg.defaultColWidth;
-      const w = (sel.c1 - sel.c0 + 1) * cfg.defaultColWidth;
-      ctx.fillRect(
-        x,
-        firstRow * cfg.defaultRowHeight,
-        w,
-        (lastRow - firstRow + 1) * cfg.defaultRowHeight
-      );
-      ctx.fillStyle = "#ffffff"; /* anchor cell */
-      ctx.fillRect(
-        sel.anchorCol * cfg.defaultColWidth, // ← fixed column
-        0, // first row
-        cfg.defaultColWidth,
-        cfg.defaultRowHeight
-      );
-    } else if (sel instanceof RowRangeSelection) {
-      /* --- RowRangeSelection fill --- */
-      ctx.fillStyle = this.selectionFill;
-      const y = sel.r0 * cfg.defaultRowHeight;
-      const h = (sel.r1 - sel.r0 + 1) * cfg.defaultRowHeight;
-      ctx.fillRect(
-        firstCol * cfg.defaultColWidth,
-        y,
-        (lastCol - firstCol + 1) * cfg.defaultColWidth,
-        h
-      );
-      ctx.fillStyle = "#ffffff"; /* anchor cell */
-      ctx.fillRect(
-        0, // first column
-        sel.anchorRow * cfg.defaultRowHeight, // ← fixed row
-        cfg.defaultColWidth,
-        cfg.defaultRowHeight
-      );
-    }
-
-    /* Grid lines */
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = this.gridColor;
-
-    ctx.beginPath(); // vertical
-    for (let c = firstCol; c <= lastCol + 1; c++) {
-      const x = c * cfg.defaultColWidth + 0.5;
-      ctx.moveTo(x, firstRow * cfg.defaultRowHeight);
-      ctx.lineTo(x, (lastRow + 1) * cfg.defaultRowHeight);
-    }
-    ctx.stroke();
-
-    ctx.beginPath(); // horizontal
-    for (let r = firstRow; r <= lastRow + 1; r++) {
-      const y = r * cfg.defaultRowHeight + 0.5;
-      ctx.moveTo(firstCol * cfg.defaultColWidth, y);
-      ctx.lineTo((lastCol + 1) * cfg.defaultColWidth, y);
-    }
-    ctx.stroke();
-
-    /* Values */
-    ctx.font = this.font;
-    ctx.fillStyle = this.textColor;
-    ctx.textBaseline = "middle";
-    ctx.textAlign = "left";
-
-    const padX = 4;
-
-    for (let r = firstRow; r <= lastRow; r++) {
-      for (let c = firstCol; c <= lastCol; c++) {
-        const val = this.data.get(r, c);
-        if (!val) continue;
-
-        const x = c * cfg.defaultColWidth + padX;
-        const y = r * cfg.defaultRowHeight + cfg.defaultRowHeight / 2;
-        ctx.fillText(val, x, y);
-      }
-    }
-
-    ctx.restore();
+  // Compute visible range
+  let accWidth = 0, firstCol = 0;
+  for (; firstCol < colW.length && accWidth < vp.scrollX; firstCol++) {
+    accWidth += colW[firstCol];
   }
+
+  let accColWidth = accWidth, lastCol = firstCol;
+  for (; lastCol < colW.length && accColWidth < vp.scrollX + vp.width; lastCol++) {
+    accColWidth += colW[lastCol];
+  }
+
+  let accHeight = 0, firstRow = 0;
+  for (; firstRow < rowH.length && accHeight < vp.scrollY; firstRow++) {
+    accHeight += rowH[firstRow];
+  }
+
+  let accRowHeight = accHeight, lastRow = firstRow;
+  for (; lastRow < rowH.length && accRowHeight < vp.scrollY + vp.height; lastRow++) {
+    accRowHeight += rowH[lastRow];
+  }
+
+  /* ================= Selection Backgrounds ================= */
+  if (sel instanceof RangeSelection && !sel.isSingle()) {
+    const rangeX = colW.slice(0, sel.c0).reduce((a, b) => a + b, 0);
+    const rangeY = rowH.slice(0, sel.r0).reduce((a, b) => a + b, 0);
+    const rangeW = colW.slice(sel.c0, sel.c1 + 1).reduce((a, b) => a + b, 0);
+    const rangeH = rowH.slice(sel.r0, sel.r1 + 1).reduce((a, b) => a + b, 0);
+    ctx.fillStyle = this.selectionFill;
+    ctx.fillRect(rangeX, rangeY, rangeW, rangeH);
+
+    const anchorX = colW.slice(0, sel.anchorCol).reduce((a, b) => a + b, 0);
+    const anchorY = rowH.slice(0, sel.anchorRow).reduce((a, b) => a + b, 0);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(anchorX, anchorY, colW[sel.anchorCol], rowH[sel.anchorRow]);
+
+  } else if (sel instanceof CellSelection) {
+    const x = colW.slice(0, sel.col).reduce((a, b) => a + b, 0);
+    const y = rowH.slice(0, sel.row).reduce((a, b) => a + b, 0);
+    const w = colW[sel.col], h = rowH[sel.row];
+    ctx.fillStyle = this.selectionFill;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(x, y, w, h);
+
+  } else if (sel instanceof ColumnSelection) {
+    const x = colW.slice(0, sel.col).reduce((a, b) => a + b, 0);
+    const w = colW[sel.col];
+    const y = rowH.slice(0, firstRow).reduce((a, b) => a + b, 0);
+    const h = rowH.slice(firstRow, lastRow + 1).reduce((a, b) => a + b, 0);
+    ctx.fillStyle = this.selectionFill;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(x, 0, w, rowH[0]); // only highlight top cell in header
+
+  } else if (sel instanceof RowSelection) {
+    const y = rowH.slice(0, sel.row).reduce((a, b) => a + b, 0);
+    const h = rowH[sel.row];
+    const x = colW.slice(0, firstCol).reduce((a, b) => a + b, 0);
+    const w = colW.slice(firstCol, lastCol + 1).reduce((a, b) => a + b, 0);
+    ctx.fillStyle = this.selectionFill;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, y, colW[0], h); // row header cell
+
+  } else if (sel instanceof ColumnRangeSelection) {
+    const x = colW.slice(0, sel.c0).reduce((a, b) => a + b, 0);
+    const w = colW.slice(sel.c0, sel.c1 + 1).reduce((a, b) => a + b, 0);
+    // const y = rowH.slice(0, firstRow).reduce((a, b) => a + b, 0);
+    const h = rowH.slice(firstRow, lastRow + 1).reduce((a, b) => a + b, 0);
+    ctx.fillStyle = this.selectionFill;
+    ctx.fillRect(x, vp.scrollY, w, h);
+
+    const anchorX = colW.slice(0, sel.anchorCol).reduce((a, b) => a + b, 0);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(anchorX, 0, colW[sel.anchorCol], rowH[0]); // proper anchor highlight
+
+  } else if (sel instanceof RowRangeSelection) {
+    const y = rowH.slice(0, sel.r0).reduce((a, b) => a + b, 0);
+    const h = rowH.slice(sel.r0, sel.r1 + 1).reduce((a, b) => a + b, 0);
+    // const x = colW.slice(0, firstCol).reduce((a, b) => a + b, 0);
+    const w = colW.slice(firstCol, lastCol + 1).reduce((a, b) => a + b, 0);
+    ctx.fillStyle = this.selectionFill;
+    ctx.fillRect(vp.scrollX, y, w, h);
+
+    const anchorX = colW.slice(0, firstCol).reduce((a, b) => a + b, 0); // scroll offset
+    const anchorY = rowH.slice(0, sel.anchorRow).reduce((a, b) => a + b, 0);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(anchorX, anchorY, colW[firstCol], rowH[sel.anchorRow]); // anchor cell highlight
+  }
+
+  /* ================= Grid Lines ================= */
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = this.gridColor;
+
+  ctx.beginPath(); // vertical
+  let x = 0.5;
+  for (let c = 0; c <= lastCol + 1; c++) {
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, accRowHeight);
+    x += colW[c] ?? cfg.defaultColWidth;
+  }
+  ctx.stroke();
+
+  ctx.beginPath(); // horizontal
+  let y = 0.5;
+  for (let r = 0; r <= lastRow + 1; r++) {
+    ctx.moveTo(0, y);
+    ctx.lineTo(accColWidth, y);
+    y += rowH[r] ?? cfg.defaultRowHeight;
+  }
+  ctx.stroke();
+
+  /* ================= Cell Values ================= */
+  ctx.font = this.font;
+  ctx.fillStyle = this.textColor;
+  ctx.textBaseline = "middle";
+  ctx.textAlign = "left";
+
+  const padX = 4;
+  let drawY = rowH.slice(0, firstRow).reduce((a, b) => a + b, 0);
+  for (let r = firstRow; r <= lastRow; r++) {
+    let drawX = colW.slice(0, firstCol).reduce((a, b) => a + b, 0);
+    for (let c = firstCol; c <= lastCol; c++) {
+      const val = this.data.get(r, c);
+      if (val) {
+        ctx.fillText(val, drawX + padX, drawY + rowH[r] / 2);
+      }
+      drawX += colW[c];
+    }
+    drawY += rowH[r];
+  }
+
+  ctx.restore();
+}
 
   /* ───────────────────  Column headers  ──────────────────────────────── */
 
@@ -502,7 +841,6 @@ export class Renderer {
       );
       ctx.stroke();
       /* bottom divider */
-      
 
       y += h;
     }
@@ -527,20 +865,81 @@ export class Renderer {
    * @param sel
    * @returns
    */
+  // private drawSelectionOutline(vp: Viewport, sel: AnySelection): void {
+  //   if (!sel) return;
+
+  //   const { ctx, cfg } = this;
+  //   /* Visible row/col span in the current viewport */
+  //   const firstVisibleRow = Math.floor(vp.scrollY / cfg.defaultRowHeight);
+  //   const visibleRows = Math.ceil(
+  //     (vp.height - cfg.headerHeight) / cfg.defaultRowHeight
+  //   );
+
+  //   const firstVisibleCol = Math.floor(vp.scrollX / cfg.defaultColWidth);
+  //   const visibleCols = Math.ceil(
+  //     (vp.width - cfg.headerWidth) / cfg.defaultColWidth
+  //   );
+
+  //   let x = 0,
+  //     y = 0,
+  //     w = 0,
+  //     h = 0;
+
+  //   if (sel instanceof CellSelection) {
+  //     x = cfg.headerWidth + sel.col * cfg.defaultColWidth - vp.scrollX;
+  //     y = cfg.headerHeight + sel.row * cfg.defaultRowHeight - vp.scrollY;
+  //     w = cfg.defaultColWidth;
+  //     h = cfg.defaultRowHeight;
+  //   } else if (sel instanceof ColumnSelection) {
+  //     x = cfg.headerWidth + sel.col * cfg.defaultColWidth - vp.scrollX;
+  //     y =
+  //       cfg.headerHeight + firstVisibleRow * cfg.defaultRowHeight - vp.scrollY;
+  //     w = cfg.defaultColWidth;
+  //     h = visibleRows * cfg.defaultRowHeight; // stop at last visible row
+  //   } else if (sel instanceof RowSelection) {
+  //     x = cfg.headerWidth + firstVisibleCol * cfg.defaultColWidth - vp.scrollX;
+  //     y = cfg.headerHeight + sel.row * cfg.defaultRowHeight - vp.scrollY;
+  //     w = visibleCols * cfg.defaultColWidth; // stop at last visible col
+  //     h = cfg.defaultRowHeight;
+  //   } else if (sel instanceof RangeSelection) {
+  //     x = cfg.headerWidth + sel.c0 * cfg.defaultColWidth - vp.scrollX;
+  //     y = cfg.headerHeight + sel.r0 * cfg.defaultRowHeight - vp.scrollY;
+  //     w = (sel.c1 - sel.c0 + 1) * cfg.defaultColWidth;
+  //     h = (sel.r1 - sel.r0 + 1) * cfg.defaultRowHeight;
+  //   } else if (sel instanceof ColumnRangeSelection) {
+  //     /* Column‑range border */
+  //     x = cfg.headerWidth + sel.c0 * cfg.defaultColWidth - vp.scrollX;
+  //     y = cfg.headerHeight;
+  //     w = (sel.c1 - sel.c0 + 1) * cfg.defaultColWidth;
+  //     h = vp.height - cfg.headerHeight;
+  //   } else if (sel instanceof RowRangeSelection) {
+  //     /* Row‑range border */
+  //     x = cfg.headerWidth;
+  //     y = cfg.headerHeight + sel.r0 * cfg.defaultRowHeight - vp.scrollY;
+  //     w = vp.width - cfg.headerWidth;
+  //     h = (sel.r1 - sel.r0 + 1) * cfg.defaultRowHeight;
+  //   }
+
+  //   ctx.save();
+  //   ctx.beginPath();
+  //   ctx.rect(
+  //     cfg.headerWidth,
+  //     cfg.headerHeight,
+  //     vp.width - cfg.headerWidth,
+  //     vp.height - cfg.headerHeight
+  //   );
+  //   ctx.clip();
+
+  //   ctx.strokeStyle = this.selectionBorder;
+  //   ctx.lineWidth = 2;
+  //   ctx.strokeRect(x + 1, y + 1, w - 1, h - 1);
+
+  //   ctx.restore();
+  // }
   private drawSelectionOutline(vp: Viewport, sel: AnySelection): void {
     if (!sel) return;
 
-    const { ctx, cfg } = this;
-    /* Visible row/col span in the current viewport */
-    const firstVisibleRow = Math.floor(vp.scrollY / cfg.defaultRowHeight);
-    const visibleRows = Math.ceil(
-      (vp.height - cfg.headerHeight) / cfg.defaultRowHeight
-    );
-
-    const firstVisibleCol = Math.floor(vp.scrollX / cfg.defaultColWidth);
-    const visibleCols = Math.ceil(
-      (vp.width - cfg.headerWidth) / cfg.defaultColWidth
-    );
+    const { ctx, cfg, colW, rowH } = this;
 
     let x = 0,
       y = 0,
@@ -548,39 +947,39 @@ export class Renderer {
       h = 0;
 
     if (sel instanceof CellSelection) {
-      x = cfg.headerWidth + sel.col * cfg.defaultColWidth - vp.scrollX;
-      y = cfg.headerHeight + sel.row * cfg.defaultRowHeight - vp.scrollY;
-      w = cfg.defaultColWidth;
-      h = cfg.defaultRowHeight;
+      x = colW.slice(0, sel.col).reduce((a, b) => a + b, 0);
+      y = rowH.slice(0, sel.row).reduce((a, b) => a + b, 0);
+      w = colW[sel.col];
+      h = rowH[sel.row];
     } else if (sel instanceof ColumnSelection) {
-      x = cfg.headerWidth + sel.col * cfg.defaultColWidth - vp.scrollX;
-      y =
-        cfg.headerHeight + firstVisibleRow * cfg.defaultRowHeight - vp.scrollY;
-      w = cfg.defaultColWidth;
-      h = visibleRows * cfg.defaultRowHeight; // stop at last visible row
+      x = colW.slice(0, sel.col).reduce((a, b) => a + b, 0);
+      w = colW[sel.col];
+      y = 0;
+      h = rowH.reduce((a, b) => a + b, 0); // full height
     } else if (sel instanceof RowSelection) {
-      x = cfg.headerWidth + firstVisibleCol * cfg.defaultColWidth - vp.scrollX;
-      y = cfg.headerHeight + sel.row * cfg.defaultRowHeight - vp.scrollY;
-      w = visibleCols * cfg.defaultColWidth; // stop at last visible col
-      h = cfg.defaultRowHeight;
+      y = rowH.slice(0, sel.row).reduce((a, b) => a + b, 0);
+      h = rowH[sel.row];
+      x = 0;
+      w = colW.reduce((a, b) => a + b, 0); // full width
     } else if (sel instanceof RangeSelection) {
-      x = cfg.headerWidth + sel.c0 * cfg.defaultColWidth - vp.scrollX;
-      y = cfg.headerHeight + sel.r0 * cfg.defaultRowHeight - vp.scrollY;
-      w = (sel.c1 - sel.c0 + 1) * cfg.defaultColWidth;
-      h = (sel.r1 - sel.r0 + 1) * cfg.defaultRowHeight;
+      x = colW.slice(0, sel.c0).reduce((a, b) => a + b, 0);
+      y = rowH.slice(0, sel.r0).reduce((a, b) => a + b, 0);
+      w = colW.slice(sel.c0, sel.c1 + 1).reduce((a, b) => a + b, 0);
+      h = rowH.slice(sel.r0, sel.r1 + 1).reduce((a, b) => a + b, 0);
     } else if (sel instanceof ColumnRangeSelection) {
-      /* Column‑range border */
-      x = cfg.headerWidth + sel.c0 * cfg.defaultColWidth - vp.scrollX;
-      y = cfg.headerHeight;
-      w = (sel.c1 - sel.c0 + 1) * cfg.defaultColWidth;
-      h = vp.height - cfg.headerHeight;
+      x = colW.slice(0, sel.c0).reduce((a, b) => a + b, 0);
+      w = colW.slice(sel.c0, sel.c1 + 1).reduce((a, b) => a + b, 0);
+      y = 0;
+      h = rowH.reduce((a, b) => a + b, 0); // full height
     } else if (sel instanceof RowRangeSelection) {
-      /* Row‑range border */
-      x = cfg.headerWidth;
-      y = cfg.headerHeight + sel.r0 * cfg.defaultRowHeight - vp.scrollY;
-      w = vp.width - cfg.headerWidth;
-      h = (sel.r1 - sel.r0 + 1) * cfg.defaultRowHeight;
+      y = rowH.slice(0, sel.r0).reduce((a, b) => a + b, 0);
+      h = rowH.slice(sel.r0, sel.r1 + 1).reduce((a, b) => a + b, 0);
+      x = 0;
+      w = colW.reduce((a, b) => a + b, 0); // full width
     }
+
+    x = x - vp.scrollX + cfg.headerWidth;
+    y = y - vp.scrollY + cfg.headerHeight;
 
     ctx.save();
     ctx.beginPath();
