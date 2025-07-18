@@ -1,22 +1,85 @@
 html, body {
   margin: 0;
   height: 100%;
-  overflow: hidden;          // page itself never scrolls
+  overflow: hidden;
 }
 
+// New styles for the status bar
+#status-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 24px;
+  background-color: #f4f6f9;
+  border-bottom: 1px solid #d4d4d4;
+  z-index: 20; // Ensure it's above the grid
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  font: 12px system-ui, sans-serif;
+  color: #555;
+  gap: 20px;
+  button {
+    padding: 2px 8px;
+    border: 1px solid #c0c0c0;
+    background-color: #f0f0f0;
+    border-radius: 3px;
+    cursor: pointer;
+    font: 12px system-ui, sans-serif;
+    color: #333;
+
+    &:hover {
+      background-color: #e6e6e6;
+      border-color: #b0b0b0;
+    }
+
+    &:active {
+      background-color: #dcdcdc;
+    }
+  }
+}
+
+.file-upload-label {
+    display: inline-block;
+    padding: 2px 8px;
+    border: 1px solid #c0c0c0;
+    background-color: #f0f0f0;
+    border-radius: 3px;
+    cursor: pointer;
+    font: 12px system-ui, sans-serif;
+    color: #333;
+    margin-right: 10px; /* Add some space between buttons */
+
+    &:hover {
+      background-color: #e6e6e6;
+      border-color: #b0b0b0;
+    }
+
+    &:active {
+      background-color: #dcdcdc;
+    }
+}
+
+#status-bar span {
+  min-width: 100px; // Give some space for each metric
+}
+
+// Adjust the grid wrapper to sit below the status bar
 #excel-wrapper {
   position: fixed;
-  inset: 0;                  // full‑screen
-  overflow: auto;            // native scrollbars ✨
-  /* Optional styling */
-  scrollbar-gutter: stable;  // keeps layout from shifting when bars appear
+  overflow: auto; 
+  scrollbar-gutter: stable;
+  top: 25px; // Pushed down by the height of the status bar + border
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(100vh - 25px);
 }
 
-/* Let the canvas sit absolutely on top of the wrapper content */
 #excel-wrapper > canvas {
-  /* OLD: position:absolute; top:0; left:0; … */
-  position: fixed;   /* pin it to the viewport */
-  inset: 0;
+  position: fixed;
+  inset: 25px 0 0 0; // Match the wrapper's offset
   display: block;
-  pointer-events: none;   // wheel/drag still go to the wrapper
+  pointer-events: none;
 }

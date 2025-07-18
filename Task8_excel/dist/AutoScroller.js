@@ -2,31 +2,36 @@
  * AutoScroller – smoother, faster, full‑window drag auto‑scroll.
  */
 export class AutoScroller {
+    /**
+     *
+     * @param {HTMLDivElement} wrapper
+     * @param {function} getPt
+     */
     constructor(wrapper, 
     /**Always‑current pointer position (clientX, clientY) */
-    getPt) {
+    getPt, getBounds, getCellSize) {
         this.wrapper = wrapper;
         this.getPt = getPt;
+        this.getBounds = getBounds;
+        this.getCellSize = getCellSize;
         this.raf = 0;
         this.lockAxis = "both";
     }
-    // start(): void {
-    //     if (this.raf) return;
-    //     const step = () => {
-    //         const v = this.edgeSpeed(this.getPt());
-    //         if (v.dx || v.dy) this.wrapper.scrollBy(v.dx, v.dy);
-    //         this.raf = requestAnimationFrame(step);
-    //     };
-    //     this.raf = requestAnimationFrame(step);
-    // }
+    /**
+     *
+     * @param {string} lockAxis
+     * @returns
+     */
     start(lockAxis = "both") {
         this.lockAxis = lockAxis;
         if (this.raf)
             return;
         const step = () => {
             const v = this.edgeSpeed(this.getPt());
-            if (v.dx || v.dy)
+            if (v.dx || v.dy) {
+                // Scroll the wrapper element, not the window
                 this.wrapper.scrollBy(v.dx, v.dy);
+            }
             this.raf = requestAnimationFrame(step);
         };
         this.raf = requestAnimationFrame(step);
@@ -36,56 +41,39 @@ export class AutoScroller {
             cancelAnimationFrame(this.raf);
         this.raf = 0;
     }
-    /**Return px/frame scroll speed based on pointer proximity to *inner* edges.*/
+    /**Return px/frame scroll speed based on pointer proximity to *window* edges for full-window dragging.*/
     /**
      *
      * @param p
-     * @returns
+     * @param {number} p.x
+     * @param {number} p.y
+     * @returns { dx: number; dy: number }
+     *
      */
-    // private edgeSpeed(p: { x: number; y: number }): { dx: number; dy: number } {
-    //     const r = this.wrapper.getBoundingClientRect();
-    //     const zone = 80;              // px inside each edge
-    //     const maxPerSec = 1200;       // px/sec if pointer is hard against the edge
-    //     const perFrame = maxPerSec / 60;     // assume ≈60 fps
-    //     const lin = (d: number) => Math.min(perFrame, (perFrame * d) / zone);
-    //     /* ------------ horizontal (left / right) ------------ */
-    //     const dx =
-    //         p.x < r.left + zone
-    //             ? -lin(r.left + zone - p.x)                   /* scroll left  */
-    //             : p.x > r.right - zone
-    //                 ? lin(p.x - (r.right - zone))                /* scroll right */
-    //                 : 0;
-    //     /* ------------ vertical (top / bottom) -------------- */
-    //     const dy =
-    //         p.y < r.top + zone
-    //             ? -lin(r.top + zone - p.y)                    /* scroll up    */
-    //             : p.y > r.bottom - zone
-    //                 ? lin(p.y - (r.bottom - zone))               /* scroll down  */
-    //                 : 0;
-    //     return { dx, dy };
-    // }
     edgeSpeed(p) {
-        const r = this.wrapper.getBoundingClientRect();
-        const zone = 80;
-        const maxPerSec = 1200;
-        const perFrame = maxPerSec / 60;
-        const lin = (d) => Math.min(perFrame, (perFrame * d) / zone);
+        const { left, top, right, bottom } = this.getBounds();
+        const { rowH } = this.getCellSize();
+        // The horizontal scroll speed is now a fixed value for smoother, more predictable behavior.
+        // The previous value of 30px/frame was too fast.
+        const dxStep = 10;
+        // The vertical scroll speed is based on the row height to maintain a "by-row" scrolling feel.
+        const dyStep = rowH;
         let dx = 0, dy = 0;
         if (this.lockAxis === "both" || this.lockAxis === "x") {
-            dx =
-                p.x < r.left + zone
-                    ? -lin(r.left + zone - p.x)
-                    : p.x > r.right - zone
-                        ? lin(p.x - (r.right - zone))
-                        : 0;
+            if (p.x <= left + 60) {
+                dx = -dxStep; // scroll left by 10px per frame
+            }
+            else if (p.x > right) {
+                dx = dxStep; // scroll right by 10px per frame
+            }
         }
         if (this.lockAxis === "both" || this.lockAxis === "y") {
-            dy =
-                p.y < r.top + zone
-                    ? -lin(r.top + zone - p.y)
-                    : p.y > r.bottom - zone
-                        ? lin(p.y - (r.bottom - zone))
-                        : 0;
+            if (p.y <= top + 24) {
+                dy = -dyStep; // scroll up by one row
+            }
+            else if (p.y > bottom) {
+                dy = dyStep; // scroll down by one row
+            }
         }
         return { dx, dy };
     }
